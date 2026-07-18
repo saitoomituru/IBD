@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeroroomlab.example/ibd/season-0/last-order.schema.json",
+  "title": "IBD Last Order Season 0 Draft",
+  "type": "object",
+  "required": ["schema_version", "last_order_id", "famlog_ref", "branch_ref", "status", "stopped_at", "reason", "requested_next", "resume_when", "purpose_ref", "issued_by"],
+  "properties": {
+    "schema_version": {"const": "ibd.last-order/0.1.0-draft"},
+    "last_order_id": {"type": "string"},
+    "famlog_ref": {"type": "string"},
+    "branch_ref": {"type": "string"},
+    "status": {"enum": ["suspended", "resumable", "resolved", "cancelled"]},
+    "stopped_at": {"type": "string"},
+    "reason": {
+      "type": "object",
+      "required": ["code"],
+      "properties": {"code": {"type": "string"}, "detail": {"type": ["string", "null"]}},
+      "additionalProperties": true
+    },
+    "last_completed_operation": {"type": ["object", "null"]},
+    "requested_next": {"type": "object"},
+    "resume_when": {"type": "array", "items": {"type": "string"}},
+    "source_observation_refs": {"type": "array", "items": {"type": "string"}},
+    "purpose_ref": {"type": "string"},
+    "issued_by": {"type": "string"}
+  },
+  "additionalProperties": false
+}

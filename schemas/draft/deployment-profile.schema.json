@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeroroomlab.example/ibd/season-0/deployment-profile.schema.json",
+  "title": "IBD Deployment Profile Season 0 Draft",
+  "type": "object",
+  "required": ["schema_version", "profile_id", "mode", "database_refs", "interfaces", "workers"],
+  "properties": {
+    "schema_version": {"const": "ibd.deployment-profile/0.1.0-draft"},
+    "profile_id": {"type": "string"},
+    "mode": {"enum": ["embedded_library", "native_service", "containerized_service"]},
+    "database_refs": {"type": "array", "items": {"type": "string", "pattern": "^ibd://"}},
+    "interfaces": {
+      "type": "object",
+      "properties": {
+        "library": {"type": "boolean"},
+        "local_ipc": {"type": "boolean"},
+        "network_api": {"type": "boolean"}
+      },
+      "additionalProperties": true
+    },
+    "workers": {
+      "type": "object",
+      "properties": {
+        "vector_index": {"enum": ["inline", "background", "external"]},
+        "evidence_watch": {"enum": ["disabled", "inline", "background", "external"]},
+        "composition": {"enum": ["on_demand", "background", "external"]}
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

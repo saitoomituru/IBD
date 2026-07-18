@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeroroomlab.example/ibd/season-0/ibd-database-manifest.schema.json",
+  "title": "IBD Database Manifest Season 0 Draft",
+  "type": "object",
+  "required": ["schema_version", "database_id", "schema_bundle_ref", "registry_refs", "isolation", "storage_bindings"],
+  "properties": {
+    "schema_version": {"const": "ibd.database-manifest/0.1.0-draft"},
+    "database_id": {"type": "string", "pattern": "^ibd://"},
+    "schema_bundle_ref": {"type": "string", "minLength": 1},
+    "registry_refs": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "isolation": {
+      "type": "object",
+      "required": ["default_cross_database_read", "default_cross_database_write"],
+      "properties": {
+        "default_cross_database_read": {"const": "deny"},
+        "default_cross_database_write": {"const": "deny"}
+      },
+      "additionalProperties": false
+    },
+    "storage_bindings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["binding_kind", "binding_ref"],
+        "properties": {
+          "binding_kind": {"enum": ["graph", "vector", "metadata", "object", "external_evidence"]},
+          "binding_ref": {"type": "string", "minLength": 1}
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": false
+}

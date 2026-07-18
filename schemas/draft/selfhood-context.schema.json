@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeroroomlab.example/ibd/season-0/selfhood-context.schema.json",
+  "title": "IBD Selfhood Context Season 0 Draft",
+  "type": "object",
+  "required": ["schema_version", "subject", "actors", "agent_instances", "runtimes", "continuity_claims", "body_bindings", "provenance"],
+  "properties": {
+    "schema_version": {"const": "ibd.selfhood-context/0.1.0-draft"},
+    "subject": {"type": "object", "required": ["subject_id"], "properties": {"subject_id": {"type": "string"}}, "additionalProperties": true},
+    "actors": {"type": "array", "items": {"type": "object", "required": ["actor_id"], "properties": {"actor_id": {"type": "string"}}, "additionalProperties": true}},
+    "agent_instances": {"type": "array", "items": {"type": "object", "required": ["instance_id"], "properties": {"instance_id": {"type": "string"}}, "additionalProperties": true}},
+    "runtimes": {"type": "array", "items": {"type": "object", "required": ["runtime_id"], "properties": {"runtime_id": {"type": "string"}}, "additionalProperties": true}},
+    "continuity_claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["claim_id", "status", "claimed_by", "evidence_refs"],
+        "properties": {
+          "claim_id": {"type": "string"},
+          "status": {"enum": ["explicit", "claimed", "derived", "unknown", "disputed"]},
+          "claimed_by": {"type": "string"},
+          "evidence_refs": {"type": "array", "items": {"type": "string"}}
+        },
+        "additionalProperties": true
+      }
+    },
+    "body_bindings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["binding_id", "database_ref", "registry_ref"],
+        "properties": {
+          "binding_id": {"type": "string"},
+          "database_ref": {"type": "string", "pattern": "^ibd://"},
+          "registry_ref": {"type": "string"}
+        },
+        "additionalProperties": true
+      }
+    },
+    "role_assignments": {"type": "array", "items": {"type": "object"}},
+    "provenance": {"type": "object"}
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeroroomlab.example/ibd/season-0/classification-registry.schema.json",
+  "title": "IBD Classification Registry Season 0 Draft",
+  "type": "object",
+  "required": ["schema_version", "registry_id", "supplied_by", "semantic_scope", "version", "classes", "routing_policy"],
+  "properties": {
+    "schema_version": {"const": "ibd.classification-registry/0.1.0-draft"},
+    "registry_id": {"type": "string", "minLength": 1},
+    "supplied_by": {"type": "string", "minLength": 1},
+    "semantic_scope": {"type": "string", "minLength": 1},
+    "version": {"type": ["string", "integer"]},
+    "classifier_profile": {"type": ["string", "null"]},
+    "classes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["class_id", "description", "database_ref"],
+        "properties": {
+          "class_id": {"type": "string", "minLength": 1},
+          "description": {"type": "string"},
+          "database_ref": {"type": "string", "minLength": 1},
+          "prototype_refs": {"type": "array", "items": {"type": "string"}}
+        },
+        "additionalProperties": true
+      }
+    },
+    "routing_policy": {
+      "type": "object",
+      "required": ["mode", "below_threshold", "cross_registry_mix"],
+      "properties": {
+        "mode": {"enum": ["single_label", "multi_label"]},
+        "below_threshold": {"enum": ["unclassified", "routing_required", "registry_defined"]},
+        "cross_registry_mix": {"const": "explicit_only"}
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,49 @@
+{
+  "schema_version": "ibd.query-fam/0.1.0-draft",
+  "query_fam_id": "fam:query:season-0-example",
+  "ψ": {
+    "situation": "人工案件の数量と原価が前回観測から変化した"
+  },
+  "∇φ": {
+    "requested_methods": [
+      "recall_similar_case",
+      "compare_quantities",
+      "check_refutation"
+    ]
+  },
+  "λ": {
+    "purpose": "再探索が必要な枝を含む探索技を組み立てる"
+  },
+  "Q": {
+    "registry_refs": [
+      "season-0.system.v1",
+      "season-0.agent.v1",
+      "season-0.finance.v1"
+    ],
+    "database_scopes": [
+      "ibd://agent",
+      "ibd://finance"
+    ],
+    "evidence_sources": [
+      "fixture://quantities"
+    ],
+    "permissions": {
+      "external_write": false
+    },
+    "freshness": {
+      "require_observation_comparison": true
+    },
+    "stop_conditions": [
+      "evidence_missing",
+      "human_evaluation_required"
+    ],
+    "composition": {
+      "enabled": true,
+      "mode": "non_destructive",
+      "mapping_fam_refs": [
+        "fam:mapping:agent-finance:v1"
+      ],
+      "write_back": false
+    }
+  }
+}

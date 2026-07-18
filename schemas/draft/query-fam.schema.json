@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeroroomlab.example/ibd/season-0/query-fam.schema.json",
+  "title": "IBD Query FAM Season 0 Draft",
+  "type": "object",
+  "required": ["schema_version", "query_fam_id", "ψ", "∇φ", "λ", "Q"],
+  "properties": {
+    "schema_version": {"const": "ibd.query-fam/0.1.0-draft"},
+    "query_fam_id": {"type": "string", "minLength": 1},
+    "ψ": {
+      "type": "object",
+      "required": ["situation"],
+      "properties": {"situation": {"type": "string", "minLength": 1}},
+      "additionalProperties": true
+    },
+    "∇φ": {
+      "type": "object",
+      "properties": {
+        "requested_methods": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": true
+    },
+    "λ": {
+      "type": "object",
+      "required": ["purpose"],
+      "properties": {"purpose": {"type": "string", "minLength": 1}},
+      "additionalProperties": true
+    },
+    "Q": {
+      "type": "object",
+      "required": ["registry_refs", "database_scopes"],
+      "properties": {
+        "registry_refs": {"type": "array", "items": {"type": "string"}},
+        "database_scopes": {"type": "array", "items": {"type": "string"}},
+        "evidence_sources": {"type": "array", "items": {"type": "string"}},
+        "permissions": {"type": "object"},
+        "freshness": {"type": "object"},
+        "stop_conditions": {"type": "array", "items": {"type": "string"}},
+        "composition": {
+          "type": "object",
+          "properties": {
+            "enabled": {"type": "boolean"},
+            "mode": {"enum": ["none", "non_destructive"]},
+            "mapping_fam_refs": {"type": "array", "items": {"type": "string"}},
+            "write_back": {"const": false}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

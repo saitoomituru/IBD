@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeroroomlab.example/ibd/season-0/infoton-cluster.schema.json",
+  "title": "IBD Infoton Cluster Season 0 Draft",
+  "type": "object",
+  "required": ["schema_version", "cluster_id", "database_ref", "registry_ref", "source_famlog_ref", "branch", "classification", "ports", "provenance"],
+  "properties": {
+    "schema_version": {"const": "ibd.infoton-cluster/0.1.0-draft"},
+    "cluster_id": {"type": "string", "minLength": 1},
+    "database_ref": {"type": "string", "pattern": "^ibd://"},
+    "registry_ref": {"type": "string", "minLength": 1},
+    "source_famlog_ref": {"type": "string", "minLength": 1},
+    "branch": {"type": "object"},
+    "classification": {
+      "type": "object",
+      "required": ["classifier_profile", "candidates", "selected", "decision"],
+      "properties": {
+        "classifier_profile": {"type": ["string", "null"]},
+        "candidates": {"type": "array", "items": {"type": "object"}},
+        "selected": {"type": "array", "items": {"type": "string"}},
+        "decision": {"enum": ["single_label", "multi_label", "unclassified", "routing_required"]},
+        "evidence_refs": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": true
+    },
+    "ports": {
+      "type": "object",
+      "properties": {
+        "inputs": {"type": "array", "items": {"type": "object"}},
+        "outputs": {"type": "array", "items": {"type": "object"}}
+      },
+      "additionalProperties": false
+    },
+    "required_evidence": {"type": "array", "items": {"type": "string"}},
+    "required_capabilities": {"type": "array", "items": {"type": "string"}},
+    "stop_conditions": {"type": "array", "items": {"type": "string"}},
+    "failure_refs": {"type": "array", "items": {"type": "string"}},
+    "provenance": {"type": "object"}
+  },
+  "additionalProperties": true
+}

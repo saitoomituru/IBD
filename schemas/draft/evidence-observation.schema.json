@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeroroomlab.example/ibd/season-0/evidence-observation.schema.json",
+  "title": "IBD Evidence Observation Season 0 Draft",
+  "type": "object",
+  "required": ["schema_version", "observation_id", "connector_id", "source_object", "query_fingerprint", "parameter_hash", "result_hash", "observed_at", "dependent_branches"],
+  "properties": {
+    "schema_version": {"const": "ibd.evidence-observation/0.1.0-draft"},
+    "observation_id": {"type": "string"},
+    "connector_id": {"type": "string"},
+    "source_object": {"type": "string"},
+    "query_fingerprint": {"type": "string"},
+    "parameter_hash": {"type": "string"},
+    "schema_fingerprint": {"type": ["string", "null"]},
+    "result_hash": {"type": "string"},
+    "row_count": {"type": ["integer", "null"], "minimum": 0},
+    "observed_at": {"type": "string", "format": "date-time"},
+    "source_cursor": {"type": ["string", "null"]},
+    "source_max_updated_at": {"type": ["string", "null"], "format": "date-time"},
+    "freshness_status": {"enum": ["fresh", "stale", "unknown", "unreachable"]},
+    "dependent_branches": {"type": "array", "items": {"type": "string"}},
+    "authority_scope_ref": {"type": ["string", "null"]}
+  },
+  "additionalProperties": false
+}
