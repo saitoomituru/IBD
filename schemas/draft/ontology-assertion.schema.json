@@ -10,7 +10,8 @@
     "subject_ref": {"type": "string", "minLength": 1},
     "predicate": {"type": "string", "minLength": 1},
     "object": {},
-    "existence_status": {"enum": ["confirmed", "denied", "asserted", "disputed", "unknown", "not_applicable"]},
+    "existence_status": {"type": "string", "minLength": 1},
+    "exchange_status": {"enum": ["confirmed", "denied", "asserted", "disputed", "unknown", "not_applicable"]},
     "fact_scope": {
       "type": "object",
       "required": ["scope_kind"],

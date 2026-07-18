@@ -3,5 +3,7 @@
   {"registry_id": "season-0.agent.v1", "semantic_scope": "agent", "version": 1},
   {"registry_id": "season-0.finance.v1", "semantic_scope": "finance", "version": 1},
   {"registry_id": "mmo-a.ontology.v3", "semantic_scope": "world:mmo-a", "version": 3},
-  {"registry_id": "theology-a.ontology.v1", "semantic_scope": "theology-a", "version": 1}
+  {"registry_id": "theology-a.ontology.v1", "semantic_scope": "theology-a", "version": 1},
+  {"registry_id": "strategy-wiki.ontology.v1", "semantic_scope": "strategy-wiki", "version": 1},
+  {"registry_id": "science-a.ontology.v1", "semantic_scope": "science-a", "version": 1}
 ]

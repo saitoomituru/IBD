@@ -16,6 +16,8 @@ IBD binds an upstream ontology assertion and its fact scope.
 
 IBDは存在論の保証者ではない。しかし上位システムが`confirmed`とした存在を、Core独自の科学・企業・vendor基準で未確認へ降格してはならない。
 
+IBDが保証するのはAssertionの内容ではなく、上位Schemaから受け取った状態、scope、主張主体、根拠参照を捏造・欠落・無断変換せず返すことである。IBDはSchemaへ嘘をつかないが、そのSchemaを普遍的factの定規にはしない。
+
 ## 3. 最小レコード
 
 ```yaml
@@ -65,6 +67,19 @@ not_applicable
 
 IBD Coreはscope間の優先順位を持たない。scope変換・比較には上位Mapping FAMを要求する。
 
+### 5.1 同一語に対する複数の実在基準
+
+「魔王が実在する」という文は、定規とscopeなしには一意に評価できない。
+
+| 上位System／利用者 | 実在判定に使い得る定規 | IBDが保持するscope例 |
+|---|---|---|
+| MMO運営System | World stateにEntityが生成・配置されている | `world_internal_fact` |
+| 攻略Wiki | questが配信され、攻略対象として掲載されている | `published_content_fact` |
+| 神学者・哲学者 | 指定体系における形而上学的実在 | `theological_assertion` / `philosophical_realism` |
+| 自然科学の研究System | 指定手法で経験的に観測・検証できる | `empirical_observation` |
+
+あるscopeの`confirmed`と別scopeの`unknown`／`not_applicable`は、IBD内で自動的な矛盾解消対象にしない。上位Mapping FAMが比較方法を定めた場合だけ、由来を残してComposite FAMへ参加させる。
+
 ## 6. Query FAM
 
 Qは対象World、Registry、fact scopeを明示できる。
@@ -88,6 +103,7 @@ Q:
 - 米国企業、特定vendor、主流社会のfact基準を既定Qへ混入させる
 - scope付き存在確定を全Worldの普遍命題へ拡張する
 - 上位システムの評価をIBD自身の保証として表示する
+- 同じ語を持つという理由だけで、別RegistryのAssertionをQの結果へ混入させる
 
 ## 8. 検証項目
 
@@ -97,3 +113,4 @@ Q:
 - 別scopeを問い合わせ候補へ無断追加していない
 - cross-scope比較にMapping FAMがある
 - 返却結果がIBDの普遍的保証と誤表示されていない
+- Qが指定したRegistryとscopeの両方でAssertionを選択している

@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeroroomlab.example/ibd/season-0/temporal-envelope.schema.json",
+  "title": "IBD Temporal Envelope Season 0 Draft",
+  "type": "object",
+  "$defs": {
+    "time_point": {
+      "type": "object",
+      "required": ["raw_value", "normalized_value", "zone_id", "utc_offset", "timezone_status", "precision", "authority_ref"],
+      "properties": {
+        "raw_value": {"type": ["string", "null"]},
+        "normalized_value": {"type": ["string", "null"], "format": "date-time"},
+        "zone_id": {"type": ["string", "null"]},
+        "utc_offset": {"type": ["string", "null"]},
+        "timezone_status": {"enum": ["explicit", "derived", "unknown", "execution_environment", "not_applicable"]},
+        "precision": {"enum": ["year", "month", "day", "minute", "second", "subsecond", "unknown"]},
+        "calendar_system": {"type": ["string", "null"]},
+        "authority_ref": {"type": "string", "minLength": 1},
+        "clock_state": {"enum": ["synchronized", "unsynchronized", "uninitialized", "estimated", "unknown", "not_applicable"]},
+        "clock_reading_status": {"enum": ["observed", "derived", "placeholder", "estimated", "unknown", "not_applicable"]},
+        "calibrated": {"type": "boolean"},
+        "calibration_evidence_status": {"enum": ["verified", "unavailable", "unverified", "not_applicable"]},
+        "calibration_authority_ref": {"type": ["string", "null"]},
+        "clock_initialization_basis": {"enum": ["unix_epoch_default", "hardware_manufactured_at", "vendor_shipped_at", "firmware_built_at", "last_known_time", "fixed_factory_default", "runtime_clock", "unknown", "not_applicable"]},
+        "uncertainty_ms": {"type": ["number", "null"], "minimum": 0}
+      },
+      "additionalProperties": true
+    },
+    "logical_coordinate": {
+      "type": "object",
+      "required": ["coordinate_kind", "coordinate_system", "raw_value", "value", "unit", "authority_ref", "real_time_mapping_status"],
+      "properties": {
+        "coordinate_kind": {"type": "string", "minLength": 1},
+        "coordinate_system": {"type": "string", "minLength": 1},
+        "raw_value": {"type": ["string", "number", "integer", "object", "array", "null"]},
+        "value": {"type": ["string", "number", "integer", "object", "array", "null"]},
+        "unit": {"type": ["string", "null"]},
+        "era_ref": {"type": ["string", "null"]},
+        "world_ref": {"type": ["string", "null"]},
+        "authority_ref": {"type": "string", "minLength": 1},
+        "real_time_mapping_status": {"enum": ["not_mapped", "mapping_available", "mapped", "not_applicable"]},
+        "mapping_fam_ref": {"type": ["string", "null"]}
+      },
+      "additionalProperties": true
+    },
+    "temporal_value": {
+      "oneOf": [
+        {"$ref": "#/$defs/time_point"},
+        {"$ref": "#/$defs/logical_coordinate"}
+      ]
+    },
+    "audit_time_point": {
+      "allOf": [
+        {"$ref": "#/$defs/time_point"},
+        {
+          "type": "object",
+          "required": ["clock_state", "clock_reading_status", "calibrated", "calibration_evidence_status", "calibration_authority_ref", "clock_initialization_basis"]
+        }
+      ]
+    },
+    "clock_source": {
+      "type": "object",
+      "required": ["source_id", "source_kind", "configured", "evidence_status"],
+      "properties": {
+        "source_id": {"type": "string", "minLength": 1},
+        "source_kind": {"enum": ["ntp_server", "ptp_clock", "gps_receiver", "carrier_network_time", "radio_controlled_clock", "fm_time_signal", "rtc_module", "os_system_clock", "signed_time", "manual", "other"]},
+        "configured": {"type": "boolean"},
+        "evidence_status": {"enum": ["verified", "available", "unavailable", "unverified", "not_applicable"]},
+        "server_name": {"type": ["string", "null"]},
+        "device_ref": {"type": ["string", "null"]},
+        "carrier_ref": {"type": ["string", "null"]},
+        "station_ref": {"type": ["string", "null"]},
+        "model": {"type": ["string", "null"]},
+        "last_received_at": {"type": ["string", "null"], "format": "date-time"},
+        "last_success_at": {"type": ["string", "null"], "format": "date-time"},
+        "evidence_refs": {"type": "array", "items": {"type": "string"}},
+        "metadata": {"type": "object"}
+      },
+      "additionalProperties": true
+    },
+    "clock_profile": {
+      "type": "object",
+      "required": ["profile_id", "runtime_ref", "calibration_policy_ref", "reported_resolution_ns", "sources", "provenance"],
+      "properties": {
+        "profile_id": {"type": "string", "minLength": 1},
+        "runtime_ref": {"type": "string", "minLength": 1},
+        "calibration_policy_ref": {"type": ["string", "null"]},
+        "reported_resolution_ns": {"type": ["integer", "null"], "minimum": 0},
+        "sources": {"type": "array", "items": {"$ref": "#/$defs/clock_source"}},
+        "provenance": {"type": "object"}
+      },
+      "additionalProperties": true
+    }
+  },
+  "required": ["schema_version", "record_ref", "ibd_audit_events", "upstream_timeline", "clock_profiles", "source_payload_hash", "provenance"],
+  "properties": {
+    "schema_version": {"const": "ibd.temporal-envelope/0.1.0-draft"},
+    "record_ref": {"type": "string", "minLength": 1},
+    "ibd_audit_events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["event_id", "timeline_kind", "event_type", "operation", "target_ref", "occurred_at", "runtime_ref", "clock_source", "clock_profile_ref"],
+        "properties": {
+          "event_id": {"type": "string"},
+          "timeline_kind": {"const": "ibd_meta"},
+          "event_type": {"enum": ["record_created", "record_modified", "ingested", "imported", "exported", "indexed", "projected", "migrated", "clock_synchronized", "clock_corrected"]},
+          "operation": {"type": "string", "minLength": 1},
+          "target_ref": {"type": "string", "minLength": 1},
+          "occurred_at": {"$ref": "#/$defs/audit_time_point"},
+          "runtime_ref": {"type": "string"},
+          "clock_source": {"type": "string"},
+          "clock_profile_ref": {"type": "string", "minLength": 1},
+          "clock_authority": {"type": ["string", "null"]},
+          "boot_id": {"type": ["string", "null"]},
+          "monotonic_ns": {"type": ["integer", "null"], "minimum": 0},
+          "sequence": {"type": ["integer", "null"], "minimum": 0},
+          "corrects_event_ref": {"type": ["string", "null"]},
+          "anchor": {"type": ["object", "null"]}
+        },
+        "additionalProperties": true
+      }
+    },
+    "upstream_timeline": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["timeline_kind", "role", "time", "managed_by"],
+        "properties": {
+          "timeline_kind": {"const": "upstream_domain"},
+          "role": {"type": "string", "minLength": 1},
+          "time": {"$ref": "#/$defs/temporal_value"},
+          "managed_by": {"type": "string", "minLength": 1},
+          "world_ref": {"type": ["string", "null"]},
+          "context_ref": {"type": ["string", "null"]}
+        },
+        "additionalProperties": true
+      }
+    },
+    "clock_profiles": {"type": "array", "items": {"$ref": "#/$defs/clock_profile"}},
+    "source_payload_hash": {"type": "string", "minLength": 1},
+    "provenance": {"type": "object"}
+  },
+  "additionalProperties": false
+}

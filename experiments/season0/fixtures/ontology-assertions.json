@@ -22,5 +22,41 @@
     },
     "declared_by": "researcher:theology-a",
     "registry_ref": "theology-a.ontology.v1"
+  },
+  {
+    "ontology_assertion_id": "ibd:ontology-assertion:demon-lord-mmo",
+    "subject_ref": "ibd:entity:demon-lord-01",
+    "predicate": "exists",
+    "existence_status": "confirmed",
+    "fact_scope": {
+      "world_ref": "world:mmo-a",
+      "scope_kind": "world_internal_fact"
+    },
+    "declared_by": "system:mmo-a-authority",
+    "registry_ref": "mmo-a.ontology.v3"
+  },
+  {
+    "ontology_assertion_id": "ibd:ontology-assertion:demon-lord-wiki",
+    "subject_ref": "ibd:entity:demon-lord-01",
+    "predicate": "exists",
+    "existence_status": "confirmed",
+    "fact_scope": {
+      "world_ref": "context:strategy-wiki",
+      "scope_kind": "published_content_fact"
+    },
+    "declared_by": "system:strategy-wiki",
+    "registry_ref": "strategy-wiki.ontology.v1"
+  },
+  {
+    "ontology_assertion_id": "ibd:ontology-assertion:demon-lord-science",
+    "subject_ref": "ibd:entity:demon-lord-01",
+    "predicate": "exists",
+    "existence_status": "unknown",
+    "fact_scope": {
+      "world_ref": null,
+      "scope_kind": "empirical_observation"
+    },
+    "declared_by": "system:science-a",
+    "registry_ref": "science-a.ontology.v1"
   }
 ]

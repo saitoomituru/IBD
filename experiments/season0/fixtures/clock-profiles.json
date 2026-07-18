@@ -1,0 +1,85 @@
+[
+  {
+    "profile_id": "ibd:clock-profile:edge-01",
+    "runtime_ref": "ibd:runtime:edge-01",
+    "calibration_policy_ref": "system:edge-01:clock-policy",
+    "reported_resolution_ns": 1000000,
+    "sources": [
+      {
+        "source_id": "clock-source:edge-ntp",
+        "source_kind": "ntp_server",
+        "configured": true,
+        "evidence_status": "unavailable",
+        "server_name": "ntp.internal.example",
+        "last_success_at": null,
+        "evidence_refs": []
+      },
+      {
+        "source_id": "clock-source:edge-gps",
+        "source_kind": "gps_receiver",
+        "configured": true,
+        "evidence_status": "verified",
+        "device_ref": "gps:edge-01",
+        "last_received_at": "2026-07-18T10:00:00+09:00",
+        "evidence_refs": ["ibd:audit-event:clock-synchronized"]
+      },
+      {
+        "source_id": "clock-source:edge-carrier",
+        "source_kind": "carrier_network_time",
+        "configured": true,
+        "evidence_status": "unavailable",
+        "carrier_ref": "carrier:sim-01",
+        "evidence_refs": []
+      },
+      {
+        "source_id": "clock-source:edge-radio",
+        "source_kind": "radio_controlled_clock",
+        "configured": false,
+        "evidence_status": "not_applicable",
+        "device_ref": "radio-clock:edge-01",
+        "evidence_refs": []
+      },
+      {
+        "source_id": "clock-source:edge-fm",
+        "source_kind": "fm_time_signal",
+        "configured": false,
+        "evidence_status": "not_applicable",
+        "station_ref": "fm:station-01",
+        "evidence_refs": []
+      },
+      {
+        "source_id": "clock-source:edge-rtc",
+        "source_kind": "rtc_module",
+        "configured": true,
+        "evidence_status": "unverified",
+        "device_ref": "rtc:edge-01",
+        "model": "example-rtc",
+        "evidence_refs": []
+      }
+    ],
+    "provenance": {
+      "reported_by": "system:edge-01",
+      "captured_by": "ibd:season0-reference-harness"
+    }
+  },
+  {
+    "profile_id": "ibd:clock-profile:season0",
+    "runtime_ref": "ibd:runtime:season0",
+    "calibration_policy_ref": "system:season0:clock-policy",
+    "reported_resolution_ns": 1000000,
+    "sources": [
+      {
+        "source_id": "clock-source:season0-system",
+        "source_kind": "os_system_clock",
+        "configured": true,
+        "evidence_status": "verified",
+        "last_success_at": "2026-07-18T10:00:00+09:00",
+        "evidence_refs": ["evidence:season0-clock-sync"]
+      }
+    ],
+    "provenance": {
+      "reported_by": "system:season0",
+      "captured_by": "ibd:season0-reference-harness"
+    }
+  }
+]

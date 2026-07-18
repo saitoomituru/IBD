@@ -1,0 +1,83 @@
+{
+  "record_ref": "ibd:record:temporal-example",
+  "upstream_timeline": [
+    {
+      "timeline_kind": "upstream_domain",
+      "role": "source_created_at",
+      "managed_by": "system:legacy-a",
+      "time": {
+        "raw_value": "2020/04/01 09:00 JST",
+        "normalized_value": "2020-04-01T09:00:00+09:00",
+        "zone_id": "Asia/Tokyo",
+        "utc_offset": "+09:00",
+        "timezone_status": "explicit",
+        "precision": "second",
+        "calendar_system": "gregorian",
+        "authority_ref": "system:legacy-a"
+      }
+    },
+    {
+      "timeline_kind": "upstream_domain",
+      "role": "source_modified_at",
+      "managed_by": "system:legacy-a",
+      "time": {
+        "raw_value": "2021/02/03 12:30 JST",
+        "normalized_value": "2021-02-03T12:30:00+09:00",
+        "zone_id": "Asia/Tokyo",
+        "utc_offset": "+09:00",
+        "timezone_status": "explicit",
+        "precision": "minute",
+        "calendar_system": "gregorian",
+        "authority_ref": "system:legacy-a"
+      }
+    },
+    {
+      "timeline_kind": "upstream_domain",
+      "role": "scheduled_for",
+      "managed_by": "system:calendar-a",
+      "time": {
+        "raw_value": "2027-05-01 10:00 JST",
+        "normalized_value": "2027-05-01T10:00:00+09:00",
+        "zone_id": "Asia/Tokyo",
+        "utc_offset": "+09:00",
+        "timezone_status": "explicit",
+        "precision": "minute",
+        "calendar_system": "gregorian",
+        "authority_ref": "system:calendar-a"
+      }
+    },
+    {
+      "timeline_kind": "upstream_domain",
+      "role": "world_position",
+      "managed_by": "system:mmo-a",
+      "world_ref": "world:mmo-a",
+      "time": {
+        "coordinate_kind": "world_day",
+        "coordinate_system": "mmo-a.calendar.v2",
+        "raw_value": "第12年403日",
+        "value": 403,
+        "unit": "world_day",
+        "era_ref": "era:mmo-a-year-12",
+        "world_ref": "world:mmo-a",
+        "authority_ref": "system:mmo-a",
+        "real_time_mapping_status": "not_mapped",
+        "mapping_fam_ref": null
+      }
+    },
+    {
+      "timeline_kind": "upstream_domain",
+      "role": "legacy_local_time",
+      "managed_by": "source:unknown-zone",
+      "time": {
+        "raw_value": "1998-07-03 14:20",
+        "normalized_value": null,
+        "zone_id": null,
+        "utc_offset": null,
+        "timezone_status": "unknown",
+        "precision": "minute",
+        "calendar_system": "gregorian",
+        "authority_ref": "source:unknown-zone"
+      }
+    }
+  ]
+}

@@ -143,7 +143,38 @@ observed_at / source cursor / max updated_at
 
 後日ソースが伸びた場合、過去の結論を黙って上書きせず、影響を受ける探索枝と再探索条件をComposite FAMへ返します。
 
-## 8. 自我対応と存在論は必須要件
+## 8. 実行環境時刻と上位時系列を混ぜない
+
+IBDは複数の時計を第一級に分離します。
+
+```text
+IBD実行環境の証跡時刻
+  record created / modified
+  ingested / imported / exported
+  indexed / projected / migrated
+
+上位システムが管理する時系列
+  source created / modified
+  occurred / observed
+  valid from / valid to
+  scheduled for / business period
+```
+
+2026年にインポートした記録が、2020年に作成された原資料を表す場合、`imported_at=2026`で`source_created_at=2020`を上書きしません。未来の予定を管理するカレンダーでは、`scheduled_for`が実行時刻より未来でも異常値にしません。エクスポート時刻も上位データの変更時刻へ流用しません。
+
+ゲーム世界の日数、turn、tick、章、時代、営業期等は実時間と無関係な論理時間になれます。明示的なMapping FAMがない限りUTCへ換算しません。
+
+IBDメタ時計は「実行環境がいつ、何を、どの対象へ行ったか」を保持します。上位時系列と一緒に提示する場合も、`timeline_kind: ibd_meta`と`timeline_kind: upstream_domain`を明示し、同じ`date`欄へ畳みません。
+
+GPS、RTC、5G／network timeを取得する前にwall clockが`1970-01-01`を返すエッジ環境では、`clock_state: uninitialized`とtime qualityを記録します。ただし未校正値はepochに限りません。マザーボード製造日、ベンダー出荷日、firmware build日、固定初期値がもっともらしい日時として現れる場合もあります。NTP等の同期ログまたは信頼できるanchorをSystemから取得できない限り`calibrated: false`とし、値の見た目だけで校正済みへ昇格させません。
+
+同期前の順序はboot ID、monotonic clock、sequenceで保持し、同期後はcorrection／anchor eventを追加します。過去の未校正wall clockを黙って上書きしません。また、metadataなしにすべての1970年データを未初期化と決めつけません。
+
+時計の信憑性をどの粒度まで採用するかはIBD Coreが決めません。IBDはNTP server名、GPS最終受信、carrier network time、標準電波／FM、RTC module、校正証跡、分解能、推定誤差、不確かさを可能な範囲で返します。上位システムがQで必要粒度と許容条件を定めます。未校正時計は本文全体が偽であることを意味しませんが、IBDは未校正時刻を校正済みとして提示しません。
+
+実時間はrole、管理主体、raw value、正規化値、UTC offset、IANA timezone、精度、clock sourceを必要な範囲で保持します。timezoneがない原資料へ実行環境のtimezoneを黙って補いません。論理時間はcoordinate system、unit、ordinal、World、authorityを保持します。
+
+## 9. 自我対応と存在論は必須要件
 
 IBD Coreは自我、魂、霊、神等の存在論を自前の定規で確定・否定・保証しません。一方、上位システムが確定した存在状態、World、fact scopeを第一級に保持し、Query FAMのQに従って返せなければなりません。
 
@@ -174,7 +205,7 @@ observed_at / version
 
 自我の連続性は`explicit / claimed / derived / unknown / disputed`等の主張として保持し、IBD自身の裁定にしません。一つのSubjectがElemental、Astral、Spiritual、Cloud Chakra、Theology等の複数Databaseへまたがることを標準ケースとして扱います。
 
-## 9. 実行形態
+## 10. 実行形態
 
 IBDの意味論は配備方式から独立します。
 
@@ -186,7 +217,7 @@ Containerized Service
 
 Dockerは便利な配備手段ですが、IBDの正体でも必須条件でもありません。同じQuery FAM、Composite FAM、Database isolation、Provenance契約を、関数呼び出し、IPC、HTTP／RPCのどの境界でも維持します。
 
-## 10. IBDがやること／やらないこと
+## 11. IBDがやること／やらないこと
 
 IBDが行うこと:
 
@@ -195,6 +226,7 @@ IBDが行うこと:
 - IBD Databaseの隔離と明示的な横断検索
 - グラフ接続検査とComposite FAM生成
 - Recipe、Run Trace、Last Order、Evidence鮮度の記録
+- IBD実行環境の監査時刻と上位システム時系列の分離
 - 論理ID、Provenance、cross-database relation
 - Embedded／Service／Containerで共通する契約の提供
 
@@ -208,7 +240,7 @@ IBDが行わないこと:
 - Atlantisの配車、業務判断、人間の承認
 - AAEのモデル鍛造
 
-## 11. Season 0文書
+## 12. Season 0文書
 
 - [FAMネイティブIBDアーキテクチャ](docs/architecture/fam-native-ibd.ja.md)
 - [中立性・意味体系等価性・自我対応・実行形態](docs/architecture/neutrality-selfhood-and-execution.ja.md)
@@ -216,10 +248,11 @@ IBDが行わないこと:
 - [分類レジスタ、Database隔離、非破壊Routing契約](docs/specification/classification-registry-and-routing.ja.md)
 - [Evidence鮮度とLast Order契約](docs/specification/evidence-freshness-and-last-order.ja.md)
 - [存在論Assertionとfact scope契約](docs/specification/ontology-assertion-and-fact-scope.ja.md)
+- [実行環境時刻と上位時系列契約](docs/specification/temporal-provenance-and-upstream-timeline.ja.md)
 - [Season 0検証計画](docs/experiments/season-0-validation.ja.md)
 - [責務差分研究ノート](note/season-0/20260718__fam-native-ibd-responsibility-delta.ja.md)
 
-## 12. 現在地
+## 13. 現在地
 
 このリポジトリは仕様策定Season 0です。現時点の成果は責務、語彙、不変条件、draft Schema、人工fixture、依存なしreference harnessであり、本番実装、性能、対応DB、ライセンス、Raspberry Pi適合性は未検証です。
 
@@ -239,6 +272,7 @@ python3 -m unittest discover -s tests -p 'test_season0_*.py'
 7. 正反対のQを同じCoreで処理できる中立性
 8. Subject、Instance、Runtime、Continuityの非平板化
 9. Worldごとに異なる存在確定とfact scopeを降格・普遍化せず返すこと
+10. import／export時刻とsource／domain／schedule時刻を混ぜないこと
 
 旧AQC Dockerは歴史的プロトタイプです。IBDはその知見を継承しますが、Docker、旧人格直結、単一vector store、単一vendorの分類体系をCore要件にはしません。
 
