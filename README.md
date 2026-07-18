@@ -143,9 +143,21 @@ observed_at / source cursor / max updated_at
 
 後日ソースが伸びた場合、過去の結論を黙って上書きせず、影響を受ける探索枝と再探索条件をComposite FAMへ返します。
 
-## 8. 自我対応は必須要件
+## 8. 自我対応と存在論は必須要件
 
-IBDは自我や魂の実在を判定しませんが、自我を構成・記述・観測する層を平板化せず保存・再結合できなければなりません。
+IBD Coreは自我、魂、霊、神等の存在論を自前の定規で確定・否定・保証しません。一方、上位システムが確定した存在状態、World、fact scopeを第一級に保持し、Query FAMのQに従って返せなければなりません。
+
+例えば、MMO上位システムがそのWorld内で神を実在Entityと確定した場合、IBDは科学的実在ではないという理由でfictionへ降格しません。神学者・哲学者が特定の存在論と根拠範囲を明示した場合も、米国企業、特定AI vendor、自然科学の定規へ自動変換しません。
+
+```text
+existence status
+fact scope / World / Context
+declared or decided by
+registry / evaluator / evidence
+observed_at / version
+```
+
+を分離して保存します。`神は実在する`という書き込みをIBDが真偽判定するのではなく、どの上位システムが、どのWorldとfact scopeで`confirmed`としたかを保持し、その範囲のクエリへ忠実に返します。
 
 最低限、次を分離します。
 
@@ -192,7 +204,7 @@ IBDが行わないこと:
 - 美醜、善悪、リスク、真偽の独自判断
 - 上位Classification Registryの発明・矯正
 - 命令のないDatabase間混色
-- 自我、魂、神学、世界観の実在性判定
+- 自我、魂、神学、世界観の独自実在性判定、または上位システムによる存在確定の矯正
 - Atlantisの配車、業務判断、人間の承認
 - AAEのモデル鍛造
 
@@ -203,6 +215,7 @@ IBDが行わないこと:
 - [Query FAMとComposite FAM契約](docs/specification/fam-query-and-composition.ja.md)
 - [分類レジスタ、Database隔離、非破壊Routing契約](docs/specification/classification-registry-and-routing.ja.md)
 - [Evidence鮮度とLast Order契約](docs/specification/evidence-freshness-and-last-order.ja.md)
+- [存在論Assertionとfact scope契約](docs/specification/ontology-assertion-and-fact-scope.ja.md)
 - [Season 0検証計画](docs/experiments/season-0-validation.ja.md)
 - [責務差分研究ノート](note/season-0/20260718__fam-native-ibd-responsibility-delta.ja.md)
 
@@ -220,6 +233,7 @@ IBDが行わないこと:
 6. Evidence Source伸長による再探索判定
 7. 正反対のQを同じCoreで処理できる中立性
 8. Subject、Instance、Runtime、Continuityの非平板化
+9. Worldごとに異なる存在確定とfact scopeを降格・普遍化せず返すこと
 
 旧AQC Dockerは歴史的プロトタイプです。IBDはその知見を継承しますが、Docker、旧人格直結、単一vector store、単一vendorの分類体系をCore要件にはしません。
 

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeroroomlab.example/ibd/season-0/ontology-assertion.schema.json",
+  "title": "IBD Ontology Assertion Season 0 Draft",
+  "type": "object",
+  "required": ["schema_version", "ontology_assertion_id", "subject_ref", "predicate", "existence_status", "fact_scope", "declared_by", "registry_ref", "evidence_refs", "observed_at", "provenance"],
+  "properties": {
+    "schema_version": {"const": "ibd.ontology-assertion/0.1.0-draft"},
+    "ontology_assertion_id": {"type": "string", "minLength": 1},
+    "subject_ref": {"type": "string", "minLength": 1},
+    "predicate": {"type": "string", "minLength": 1},
+    "object": {},
+    "existence_status": {"enum": ["confirmed", "denied", "asserted", "disputed", "unknown", "not_applicable"]},
+    "fact_scope": {
+      "type": "object",
+      "required": ["scope_kind"],
+      "properties": {
+        "scope_kind": {"type": "string", "minLength": 1},
+        "world_ref": {"type": ["string", "null"]},
+        "context_ref": {"type": ["string", "null"]}
+      },
+      "additionalProperties": true
+    },
+    "declared_by": {"type": "string", "minLength": 1},
+    "registry_ref": {"type": "string", "minLength": 1},
+    "evaluation_fam_ref": {"type": ["string", "null"]},
+    "evidence_refs": {"type": "array", "items": {"type": "string"}},
+    "observed_at": {"type": "string", "format": "date-time"},
+    "provenance": {"type": "object"}
+  },
+  "additionalProperties": false
+}
