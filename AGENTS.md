@@ -16,3 +16,18 @@
 README、技術文書、翻訳、主張表現を編集する前に、ZeroRoomLab-manifestの[コーディングAI向け日本語意訳レジスタ](https://github.com/saitoomituru/ZeroRoomLab-manifest/blob/main/docs/operations/coding-ai-japanese-paraphrase-register.ja.md)を読み、背景ベクトルを取得すること。英語出力は明示がない限りen-USとし、単語の直訳ではなく、日本語原文の意図・読み手の責務・事実強度をen-USで同じ働きをする表現へ写像する。
 
 マニフェストの規約は横断的な背景と説明レジスターを提供する。IBD固有のスキーマ、テスト、ディレクトリ内の指示がある場合は、それらを実装上の優先規約として併読すること。
+
+
+## MAGIポジショントーク監査（必読）
+
+計画提案、状態評価、README／技術文書の主張変更、component間の優先順位決定、
+複数repositoryへ波及する変更の前に、ZeroRoomLab-manifestの
+[AGENTS.md §0.4](https://github.com/saitoomituru/ZeroRoomLab-manifest/blob/main/AGENTS.md)、
+[Atlantis-MAGISDK 0.1.0](https://github.com/saitoomituru/ZeroRoomLab-manifest/blob/main/docs/theory/atlantis-magi-sdk.ja.md)、
+[Context定規・因果・OAE横断監査規約](https://github.com/saitoomituru/ZeroRoomLab-manifest/blob/main/docs/operations/context-ruler-and-causality-audit.ja.md)
+を読むこと。
+
+Declared Position、Position-talk Risk、媒体とclaim scope、外部定規の出所を分離し、
+現在のrepository、cwd、vendor、binary実装、一般的な線形roadmapを暗黙のmainへ置かない。
+重大なstatus・責務・公開主張・横断変更では、監査結果とUser確認が必要な項目を記録し、
+計画をUserへ返してから実行する。
