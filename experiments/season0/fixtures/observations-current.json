@@ -1,0 +1,11 @@
+[
+  {
+    "observation_id": "ibd:evidence-observation:quantity-v2",
+    "source_key": "fixture://quantities",
+    "schema_fingerprint": "sha256:schema-v1",
+    "result_hash": "sha256:rows-v2",
+    "row_count": 3,
+    "source_cursor": "3",
+    "dependent_branches": ["fam:branch:quantity-audit"]
+  }
+]

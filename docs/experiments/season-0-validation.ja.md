@@ -35,6 +35,15 @@ ibd://finance
 5. RDB風fixtureへ行追加後、依存枝だけが`stale`になる
 6. Last Orderのresume conditionを返す
 
+Season 0の実行可能なreference harnessは`experiments/season0/`に置く。Python標準ライブラリと人工fixtureだけを使い、production resolverや物理DB選定の証拠とはみなさない。
+
+```bash
+python3 experiments/season0/reference_harness.py
+python3 -m unittest discover -s tests -p 'test_season0_*.py'
+```
+
+CLIは実データ本文を表示せず、選択Database、cluster件数、stale件数、Last Order件数、Ontology Assertion件数、source mutationだけを要約する。
+
 ## 4. Experiment B: semantic parity and selfhood
 
 二つの正反対Policyを同じCoreへ渡す。

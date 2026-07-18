@@ -1,0 +1,11 @@
+[
+  {
+    "last_order_id": "ibd:last-order:archived-quantity",
+    "database_ref": "ibd://finance",
+    "branch_ref": "fam:branch:quantity-audit",
+    "status": "suspended",
+    "reason": "evidence_unavailable",
+    "requested_next": "fetch_archived_quantity",
+    "resume_when": ["archive_connector_available"]
+  }
+]

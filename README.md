@@ -221,7 +221,12 @@ IBDが行わないこと:
 
 ## 12. 現在地
 
-このリポジトリは仕様策定Season 0です。現時点の成果は責務、語彙、不変条件、検証計画の草案であり、本番実装、性能、対応DB、ライセンス、Raspberry Pi適合性は未検証です。
+このリポジトリは仕様策定Season 0です。現時点の成果は責務、語彙、不変条件、draft Schema、人工fixture、依存なしreference harnessであり、本番実装、性能、対応DB、ライセンス、Raspberry Pi適合性は未検証です。
+
+```bash
+python3 experiments/season0/reference_harness.py
+python3 -m unittest discover -s tests -p 'test_season0_*.py'
+```
 
 最初の縦切りでは人工fixtureだけを使い、次を確認します。
 

@@ -1,0 +1,11 @@
+{
+  "subject": {"subject_id": "ibd:subject:astro-01"},
+  "actor": {"actor_id": "ibd:actor:astro"},
+  "agent_instance": {"instance_id": "ibd:instance:ghost-20260718"},
+  "runtime": {"runtime_id": "ibd:runtime:edge-process-01"},
+  "continuity_claim": {
+    "claim_id": "ibd:continuity:01",
+    "status": "claimed",
+    "claimed_by": "ibd:actor:astro"
+  }
+}

@@ -1,0 +1,30 @@
+[
+  {
+    "cluster_id": "ibd:cluster:system-hidden",
+    "database_ref": "ibd://system",
+    "branch_id": "fam:branch:system-hidden",
+    "content_hash": "sha256:system-hidden",
+    "vector_score": 0.99
+  },
+  {
+    "cluster_id": "ibd:cluster:agent-recall",
+    "database_ref": "ibd://agent",
+    "branch_id": "fam:branch:agent-recall",
+    "content_hash": "sha256:agent-recall",
+    "vector_score": 0.87
+  },
+  {
+    "cluster_id": "ibd:cluster:quantity-audit",
+    "database_ref": "ibd://finance",
+    "branch_id": "fam:branch:quantity-audit",
+    "content_hash": "sha256:quantity-audit",
+    "vector_score": 0.92
+  },
+  {
+    "cluster_id": "ibd:cluster:mmo-ontology",
+    "database_ref": "ibd://spiritual",
+    "branch_id": "fam:branch:mmo-ontology",
+    "content_hash": "sha256:mmo-ontology",
+    "vector_score": 0.91
+  }
+]

@@ -1,0 +1,6 @@
+[
+  {"database_id": "ibd://system", "schema_bundle_ref": "schema://system/v1"},
+  {"database_id": "ibd://agent", "schema_bundle_ref": "schema://agent/v1"},
+  {"database_id": "ibd://finance", "schema_bundle_ref": "schema://finance/v1"},
+  {"database_id": "ibd://spiritual", "schema_bundle_ref": "schema://spiritual/v1"}
+]

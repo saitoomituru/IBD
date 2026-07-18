@@ -1,0 +1,30 @@
+{
+  "schema_version": "ibd.query-fam/0.1.0-draft",
+  "query_fam_id": "fam:query:season-0-ontology-example",
+  "ψ": {
+    "situation": "MMO World内の神Entityの存在状態を確認する"
+  },
+  "∇φ": {
+    "requested_methods": ["resolve_world_ontology"]
+  },
+  "λ": {
+    "purpose": "指定Worldとfact scopeにおける存在状態を返す"
+  },
+  "Q": {
+    "registry_refs": ["mmo-a.ontology.v3"],
+    "database_scopes": ["ibd://spiritual"],
+    "ontology_scopes": [
+      {"world_ref": "world:mmo-a", "fact_scope": "world_internal_fact"}
+    ],
+    "evidence_sources": [],
+    "permissions": {},
+    "freshness": {},
+    "stop_conditions": [],
+    "composition": {
+      "enabled": false,
+      "mode": "none",
+      "mapping_fam_refs": [],
+      "write_back": false
+    }
+  }
+}
