@@ -195,3 +195,15 @@ GenAI PluginとGDSをoptional trackとする。外部生成vectorの投入経路
 - 共有索引をsecurity boundaryにできるか
 
 この調査は選択肢と比較条件を揃えるところまでであり、FAMの存在論・分類基準を第三者libraryへ委譲するものではない。
+
+## 12. 後続設計への引継ぎ
+
+§11は本調査を実施した時点の研究境界として保持する。その後のSeason 0アーキテクチャでは、次の責務境界を正本候補として追加した。
+
+- FAM SplitterはIBDSDK内へ標準libraryを同梱できるが、interfaceは差替可能SPIとする
+- Meta CatalogはPortをCore契約とし、MariaDBは標準adapter候補とする
+- Neo4jはgraph／vectorのlocal matcher候補であり、Splitterでも異種embedding変換器でもない
+- 異storeのlocal resultはraw scoreで直接比較せず、SsC等の校正moduleを別途研究する
+- SsCはquery vectorを別空間へ翻訳せず、local scoreと検索射程をcalibration profile経由で抽象化する
+
+詳細は[Context Dimension OSにおけるIBDとIBDSDK](../architecture/context-dimension-os-and-ibdsdk.ja.md)と[IBDSDK module契約](../specification/ibd-sdk-module-contracts.ja.md)を参照する。製品採用、数理関数、性能、edge適合性は引き続き未決である。

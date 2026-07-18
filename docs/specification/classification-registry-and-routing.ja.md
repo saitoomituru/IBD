@@ -25,13 +25,49 @@ routing_policy:
 
 IBDはclassを追加・削除・矯正しない。分類結果にはRegistry、model、version、score、根拠spanまたはevidence refを付ける。
 
+### 1.1 RegistryとContext Register
+
+Registryは分類の型、定規、境界、unknown、routeを定義する。Context Registerは、そのRegistryへbindされたFAM、Assertion、観測、値の管理実体である。IBDは両者を同義にしない。
+
+既存の`Classification Registry`名称は維持する。runtimeの分類結果や情報子クラスターをRegistryと呼ばない。
+
+### 1.2 Context Dimension RefとFold Profile
+
+Registryはclassごとに`context_dimension_ref`を関連付けられる。複数Dimensionを一つのFoldへ束ねる場合は、上位SystemがFold Profileを明示する。
+
+```yaml
+context_fold:
+  fold_ref: fold://accounting-operation/v1
+  dimension_refs:
+    - dimension://financial
+    - dimension://tec
+    - dimension://supply
+  context_dimension_count: 3
+```
+
+`context_dimension_count`は軸数であり、Splitterが返したcandidate数ではない。同じ3DでもDimension IDやRegistry revisionが違えば互換としない。
+
+### 1.3 IBD Store Manifest
+
+```yaml
+store_id: ibd-store://project-a
+meta_catalog_binding_ref: catalog://project-a
+default_splitter_binding_ref: splitter-binding://zrl-default@1
+database_refs:
+  - ibd://finance
+```
+
+IBD Storeは複数IBD Databaseの管理境界である。MariaDBをMeta Catalogの標準adapterにできるが、StoreとMariaDB serverを同義にしない。
+
 ## 2. IBD Database Manifest
 
 ```yaml
 database_id: ibd://finance
 schema_bundle_ref: schema://finance/v1
+context_fold_profile_ref: fold://accounting-operation/v1
 registry_refs:
   - atlantis.accounting.v1
+splitter_binding_ref: null
 isolation:
   default_cross_database_read: deny
   default_cross_database_write: deny
@@ -39,6 +75,8 @@ storage_bindings: []
 ```
 
 `storage_bindings`は論理Databaseをgraph、vector、metadata、object、external evidenceへ接続する。物理製品はSeason 0のCore契約に固定しない。
+
+`splitter_binding_ref`が未指定の場合はStoreの既定Bindingを継承する。Database overrideは一つの有効Bindingへ解決し、解決経路をreceiptへ残す。
 
 ## 3. 分類結果
 
@@ -86,3 +124,28 @@ Mapping FAMなしで同名classを結合しない。結合できない場合はs
 ## 6. Routingの責務
 
 Splitterは候補分類と根拠を出す。Registryが保存先を決める。IBD adapterが決定的に書き込む。expert selection、価値判断、最終的な評価は別段に置く。
+
+### 6.1 FAM Splitter SPI
+
+```text
+split(source_fam, registry_ref, fold_ref, routing_policy_ref)
+  -> candidate routes + evidence + unmapped + splitter receipt
+```
+
+ZeroRoomLab標準SplitterをIBDSDKへ同梱できるが、同じSPIを満たす第三者Splitterへ差替可能にする。SplitterはRegistry外のclassやDatabaseを生成しない。
+
+### 6.2 Bindingの解決
+
+```text
+Database override
+  -> Store default
+  -> unresolved
+```
+
+一つのDatabaseで複数Splitterを実行するensembleは、単一Bindingの内部profileとして明示する。Binding候補を暗黙順序で総当たりしない。
+
+### 6.3 failureとfallback
+
+custom Splitterが失敗した場合は`failed`とreceiptを返す。上位Policyが明示的に許可した場合だけ別Bindingへfallbackし、最初の失敗を隠さない。
+
+分類score、local retrieval score、SsCの校正SIN、Compositeのfusion rankは別namespaceで保持する。

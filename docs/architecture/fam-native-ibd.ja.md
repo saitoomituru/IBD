@@ -26,7 +26,7 @@ Query FAM
   ↓
 QからRegistry、Database、権限、Evidence条件を解決
   ↓
-Databaseごとの候補集合を層・型・portで限定
+Databaseごとの候補集合をContext Dimension・Schema型・graph portで限定
   ↓
 限定集合内をベクトル検索
   ↓
@@ -38,6 +38,15 @@ Composite FAMを派生生成
 ```
 
 ベクトル類似度は候補発見に使い、Registry境界、Database isolation、graph compatibility、Qを迂回しない。
+
+同一IBD Database内のvectorは、そのDatabaseが採用したembedding profile、dimension、metricへ揃える。異なるDatabase／storage bindingではraw vectorとraw scoreを直接比較せず、Query FAMのtext／構造を各engineへ渡してlocal retrievalを行い、rank、calibration profile、uncertaintyを保持して上位で合成する。
+
+```text
+store-local vector search
+  -> local retrieval run
+  -> graph relation / Evidence / Last Order検査
+  -> Mapping FAM / calibration / Composite Resolver
+```
 
 ## 4. 書き込み経路
 
@@ -93,6 +102,20 @@ Composite FAM
 
 自動的に元Databaseへ書き戻さない。繰り返し再現され、上位システムまたはユーザーが昇格を決定した場合だけ、新しい情報子クラスターまたはSchema Bundle候補とする。
 
+### 6.1 Fold越境
+
+Database横断結合では、次を分離する。
+
+```text
+Access Map             変換可能性・条件・lossの定義
+Mapping FAM            接続する探索技のRecipe
+Transformer            能動変換するAgency／function
+transformation receipt 入出力と実行結果の証跡
+OAE                    観測されたEffectのContext管理単位
+```
+
+Access Mapが存在するだけで変換済みとしない。Mapping FAMを実行したRun TraceとOAEも同義ではない。OAE参照を作る場合はObserver、Recorder、Interpreter、Initiator、Executor、Transformer、Causal Contributorを分離する。
+
 ## 7. 責務境界
 
 上位システムが所有するもの:
@@ -105,11 +128,14 @@ Composite FAM
 IBDが所有するもの:
 
 - RegistryとSchemaの忠実な保持
+- Store／Database／Storage BindingとMeta Catalogの解決
+- default／override FAM Splitter Bindingの決定
 - Database isolation
 - ベクトル候補発見
 - graph compatibility検査
 - 非破壊Composite FAM
 - Recipe、Run Trace、Last Order、Provenance
+- local retrieval run、score profile、calibration receipt、OAE参照
 
 実行主体が所有するもの:
 
@@ -131,8 +157,10 @@ IBDが所有するもの:
 ## 9. 未確定事項
 
 - port型の記述形式
+- 標準FAM Splitter実装、custom SPI transport、fallback policyの確定
 - vector classifierとgraph storeの製品選定
 - 一つの論理IBD Databaseを物理的に隔離する粒度
 - cross-database edgeの永続化方式
 - Composite FAMの署名、互換性、キャッシュ方針
 - Raspberry PiとServer Advancedの性能境界
+- SsCの校正関数、SIN定義、逆射影可能条件
