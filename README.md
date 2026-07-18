@@ -35,7 +35,7 @@ Classification Registryを解決
         ↓
 Qで明示されたIBD Databaseだけを選択
         ↓
-層・型・portで候補を限定してベクトル検索
+Context Dimension・Schema型・graph portで候補を限定してベクトル検索
         ↓
 グラフ接続、Evidence、Last Order、制約を検査
         ↓
@@ -91,6 +91,20 @@ IBD Database
 ```
 
 混色命令がない限り、Database間の同名ラベルや近いベクトルを自動的に混ぜません。`world-a:white`と`world-b:white`は、上位Mapping FAMが明示されない限り別の意味です。
+
+論理Database、運用単位、物理製品を分離します。
+
+```text
+IBD Store
+├─ Meta Catalog
+├─ default Splitter Binding
+└─ IBD Database[]
+   ├─ Schema Bundle / Registry / Context Fold
+   ├─ Graph / Vector Storage Bindings[]
+   └─ RDB / Evidence Connector Bindings[]
+```
+
+MariaDBはMeta Catalogの標準adapter候補、Neo4jはgraph／vector binding候補です。どちらもIBD Coreの意味論ではありません。DatabaseごとにFAM Splitterをoverrideでき、未指定時はStore既定Splitterを使います。custom Splitterの失敗時は、上位Policyの指定なしに別Splitterへ黙ってfallbackしません。
 
 ## 5. バインダーとしての中立性
 
@@ -243,7 +257,9 @@ IBDが行わないこと:
 ## 12. Season 0文書
 
 - [FAMネイティブIBDアーキテクチャ](docs/architecture/fam-native-ibd.ja.md)
+- [Context Dimension OSにおけるIBDとIBDSDK](docs/architecture/context-dimension-os-and-ibdsdk.ja.md)
 - [中立性・意味体系等価性・自我対応・実行形態](docs/architecture/neutrality-selfhood-and-execution.ja.md)
+- [IBDSDK module契約](docs/specification/ibd-sdk-module-contracts.ja.md)
 - [Query FAMとComposite FAM契約](docs/specification/fam-query-and-composition.ja.md)
 - [分類レジスタ、Database隔離、非破壊Routing契約](docs/specification/classification-registry-and-routing.ja.md)
 - [Evidence鮮度とLast Order契約](docs/specification/evidence-freshness-and-last-order.ja.md)
@@ -255,7 +271,7 @@ IBDが行わないこと:
 
 ## 13. 現在地
 
-このリポジトリは仕様策定Season 0です。現時点の成果は責務、語彙、不変条件、draft Schema、人工fixture、依存なしreference harnessと、Neo4j 2026.06を対象としたvector／embedding周辺の第三者製品調査です。本番実装、実Neo4j接続、性能、対応DB、ライセンス適合性、Raspberry Pi適合性は未検証です。
+このリポジトリは仕様策定Season 0です。現時点の成果は責務、語彙、不変条件、draft Schema、人工fixture、依存なしreference harness、IBDSDK module境界と、Neo4j 2026.06を対象としたvector／embedding周辺の第三者製品調査です。FAM Splitter SPI、Meta Catalog adapter、SsC、OAE binding、本番実装、実Neo4j接続、性能、対応DB、ライセンス適合性、Raspberry Pi適合性は未実装または未検証です。
 
 ```bash
 python3 experiments/season0/reference_harness.py
