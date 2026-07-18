@@ -249,12 +249,13 @@ IBDが行わないこと:
 - [Evidence鮮度とLast Order契約](docs/specification/evidence-freshness-and-last-order.ja.md)
 - [存在論Assertionとfact scope契約](docs/specification/ontology-assertion-and-fact-scope.ja.md)
 - [実行環境時刻と上位時系列契約](docs/specification/temporal-provenance-and-upstream-timeline.ja.md)
+- [Neo4j Vector／Embedding周辺ライブラリー調査（2026-07-18）](docs/research/neo4j-vector-and-embedding-survey-20260718.ja.md)
 - [Season 0検証計画](docs/experiments/season-0-validation.ja.md)
 - [責務差分研究ノート](note/season-0/20260718__fam-native-ibd-responsibility-delta.ja.md)
 
 ## 13. 現在地
 
-このリポジトリは仕様策定Season 0です。現時点の成果は責務、語彙、不変条件、draft Schema、人工fixture、依存なしreference harnessであり、本番実装、性能、対応DB、ライセンス、Raspberry Pi適合性は未検証です。
+このリポジトリは仕様策定Season 0です。現時点の成果は責務、語彙、不変条件、draft Schema、人工fixture、依存なしreference harnessと、Neo4j 2026.06を対象としたvector／embedding周辺の第三者製品調査です。本番実装、実Neo4j接続、性能、対応DB、ライセンス適合性、Raspberry Pi適合性は未検証です。
 
 ```bash
 python3 experiments/season0/reference_harness.py
