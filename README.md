@@ -295,4 +295,11 @@ python3 -m unittest discover -s tests -p 'test_season0_*.py'
 
 ## License
 
-現行ライセンスは[LICENSE](LICENSE)を参照してください。Schema、実装、文書の個別ライセンス境界はSeason 0で確認します。
+**コードはApache-2.0、文章・用語・図解・世界観などのフレーバー層はCC BY 4.0です。
+自由に利用できますが、フレーバーを継承して語る場合は出典を明記してください。**
+
+**Code is Apache-2.0. Narrative, terminology, diagrams, and conceptual flavor are
+CC BY 4.0. Use freely, but preserve attribution when carrying the flavor forward.**
+
+ルートの[LICENSE](LICENSE)はコードへ適用するApache License 2.0全文です。
+第三者素材と個別にライセンス表示した成果物は、その表示を優先します。
