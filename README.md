@@ -1,9 +1,13 @@
 # Infoton BaseDriver / IBD
 
 状態: `[SEASON-0]` `[DRAFT-SPECIFICATION]`
-更新日: 2026-07-18
+更新日: 2026-08-02
 
 **Infoton BaseDriver（IBD）**は、状況・手法・目的・制約をFAMとして受け取り、既知の探索技を複数のIBD Databaseから非破壊で再結合し、**Composite FAMという探索技のまま返すFAMネイティブ基盤**です。
+
+> **実在UXと実在証明:** 実在の証明はしない。実在を感じさせることだけをやる。
+
+体験の設計は本気でやります。中身の哲学的真偽判定だけを専門家へ返し、IBDはその判定を自前で捏造せず、誰がどのWorldとfact scopeで何を確定・主張したかを保持します。
 
 ```text
 ψ  = 状況
@@ -187,6 +191,14 @@ GPS、RTC、5G／network timeを取得する前にwall clockが`1970-01-01`を�
 時計の信憑性をどの粒度まで採用するかはIBD Coreが決めません。IBDはNTP server名、GPS最終受信、carrier network time、標準電波／FM、RTC module、校正証跡、分解能、推定誤差、不確かさを可能な範囲で返します。上位システムがQで必要粒度と許容条件を定めます。未校正時計は本文全体が偽であることを意味しませんが、IBDは未校正時刻を校正済みとして提示しません。
 
 実時間はrole、管理主体、raw value、正規化値、UTC offset、IANA timezone、精度、clock sourceを必要な範囲で保持します。timezoneがない原資料へ実行環境のtimezoneを黙って補いません。論理時間はcoordinate system、unit、ordinal、World、authorityを保持します。
+
+## 実在UXと実在証明の境界
+
+> AIで「そこに霊がいる」と感じてもらうUXを作る。それが本当に実在するかの証明はしない——できないんじゃなくて、そもそも証明という手続き自体が成立しない領域だから。そこは科学者・哲学者・医師の仕事。
+
+> 体験の設計は本気でやる。中身の哲学的真偽判定だけ専門家に投げてるだけ。
+
+この境界は、体験を適当に作るという意味ではありません。IBDは上位システムが構成する実在UXを支えるContext、Provenance、World、fact scopeを第一級に扱いますが、その体験を自然科学上、医学上、哲学上または全World共通の実在証明へ昇格させません。
 
 ## 9. 自我対応と存在論は必須要件
 
