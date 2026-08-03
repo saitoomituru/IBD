@@ -25,6 +25,18 @@ README、技術文書、研究ノート、UX文言を編集するときは、体
 正本: ZeroRoomLab-manifest
 [読者・AIの非裁定と追加検証コスト責任](https://github.com/saitoomituru/ZeroRoomLab-manifest/blob/main/docs/operations/reader-ai-non-adjudication-and-verification-cost.ja.md)
 
+## Log Horizon命名規則（必須）
+
+`Log Horizon`は、物理粒子Observerをsystem-levelへ拡張したとき、仮想粒子とFAMを構成するOAEが、
+embedding、全体観測不能なnetwork／model、物理sensor等の先にある完全source状態を直接観測できない、
+情報子単位のログの地平を指す。物理学上のevent horizon、Hawking radiation、Higgs粒子、未知の物理粒子の
+観測claimへ変換しない。
+
+IBDは、Horizonを越えて取得できたFAM JSONP pointer、vector、traffic、sensor reading、hash、procedure／instrument
+profile、OAE ref、freshness、Last Orderを保持する。取得不能を不存在へ変換せず、部分投影をsource全体へ昇格させない。
+命名正本はZeroRoomLab-manifestの
+[Log Horizon](https://github.com/saitoomituru/ZeroRoomLab-manifest/blob/main/docs/theory/log-horizon.ja.md)とする。
+
 ## 日本語既定レジスタ（必須）
 
 - 人間向けのREADME、技術文書、研究ノート、commit、PR、issue、code comment、CLI help、検証報告、引継ぎ票は、日本語化によって意味・互換性を壊さない限り日本語を既定とする

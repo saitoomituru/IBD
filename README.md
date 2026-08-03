@@ -235,6 +235,18 @@ observed_at / version
 
 自我の連続性は`explicit / claimed / derived / unknown / disputed`等の主張として保持し、IBD自身の裁定にしません。一つのSubjectがElemental、Astral、Spiritual、Cloud Chakra、Theology等の複数Databaseへまたがることを標準ケースとして扱います。
 
+## Log Horizonとsystem-level観測境界
+
+`Log Horizon`は、物理粒子Observerをsystem-levelへ拡張したとき、仮想粒子とFAMを構成するOAEが、embedding、
+全体を観測できないnetwork／model、物理sensor等の先にある完全なsource状態へ到達できず、部分投影だけを取得する
+情報子単位のログの地平です。物理学上のevent horizon、Hawking radiation、Higgs粒子とは別の射程名です。
+
+IBDはHorizonの先を推測で補完しません。取得できたFAM JSONP、vector、traffic、sensor reading、pointer、hash、
+procedure／instrument profile、OAE ref、freshness、Last Orderを非破壊で保持します。`取得できない`を`存在しない`へ
+変換せず、局所projectionをsource全体の証明へ昇格させません。
+
+詳細は[Log HorizonとFAM JSONP観測projection契約](docs/specification/log-horizon-and-fam-json-pointers.ja.md)を参照してください。
+
 ## 10. 実行形態
 
 IBDの意味論は配備方式から独立します。
@@ -281,6 +293,7 @@ IBDが行わないこと:
 - [Evidence鮮度とLast Order契約](docs/specification/evidence-freshness-and-last-order.ja.md)
 - [存在論Assertionとfact scope契約](docs/specification/ontology-assertion-and-fact-scope.ja.md)
 - [実行環境時刻と上位時系列契約](docs/specification/temporal-provenance-and-upstream-timeline.ja.md)
+- [Log HorizonとFAM JSONP観測projection契約](docs/specification/log-horizon-and-fam-json-pointers.ja.md)
 - [Neo4j Vector／Embedding周辺ライブラリー調査（2026-07-18）](docs/research/neo4j-vector-and-embedding-survey-20260718.ja.md)
 - [Season 0検証計画](docs/experiments/season-0-validation.ja.md)
 - [責務差分研究ノート](note/season-0/20260718__fam-native-ibd-responsibility-delta.ja.md)
