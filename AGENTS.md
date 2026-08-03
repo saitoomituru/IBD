@@ -23,7 +23,7 @@ README、技術文書、研究ノート、UX文言を編集するときは、体
 技術文書の留保をREADME冒頭へ逆流させて声量を奪わない。
 
 正本: ZeroRoomLab-manifest
-[読者・AIの非裁定と追加検証コスト責任](https://github.com/saitoomituru/ZeroRoomLab-manifest/blob/main/docs/operations/reader-ai-non-adjudication-and-verification-cost.ja.md)
+[読者・AIの非裁定と追加検証コスト責任](https://github.com/saitoomituru/ZeroRoomLab-manifest/blob/2c68eb63672e68e600518ba46679542b0914757b/docs/operations/reader-ai-non-adjudication-and-verification-cost.ja.md)
 
 ## Log Horizon命名規則（必須）
 
@@ -35,7 +35,7 @@ embedding、全体観測不能なnetwork／model、物理sensor等の先にあ�
 IBDは、Horizonを越えて取得できたFAM JSONP pointer、vector、traffic、sensor reading、hash、procedure／instrument
 profile、OAE ref、freshness、Last Orderを保持する。取得不能を不存在へ変換せず、部分投影をsource全体へ昇格させない。
 命名正本はZeroRoomLab-manifestの
-[Log Horizon](https://github.com/saitoomituru/ZeroRoomLab-manifest/blob/main/docs/theory/log-horizon.ja.md)とする。
+[Log Horizon](https://github.com/saitoomituru/ZeroRoomLab-manifest/blob/2c68eb63672e68e600518ba46679542b0914757b/docs/theory/log-horizon.ja.md)とする。
 
 ## 日本語既定レジスタ（必須）
 

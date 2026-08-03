@@ -4,7 +4,7 @@
 
 制定日: 2026-08-03
 
-命名正本: ZeroRoomLab-manifest [Log Horizon](https://github.com/saitoomituru/ZeroRoomLab-manifest/blob/main/docs/theory/log-horizon.ja.md)
+命名正本: ZeroRoomLab-manifest [Log Horizon](https://github.com/saitoomituru/ZeroRoomLab-manifest/blob/2c68eb63672e68e600518ba46679542b0914757b/docs/theory/log-horizon.ja.md)
 
 ## 1. IBDでの責務
 
