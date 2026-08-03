@@ -1,7 +1,7 @@
 # Context Dimension OSにおけるIBDとIBDSDK
 
 状態: `[DRAFT]` `[SEASON-0]`  
-更新日: 2026-07-18  
+更新日: 2026-08-03
 主たる射程: Layer A（IBD実装プロファイル）
 
 ## 1. 共通正本とIBDの境界
@@ -25,12 +25,17 @@ IBD実装プロファイル
 ```text
 technical Layer L     技術依存、実行順序、deployment責務
 Context Dimension D   Foldへ束ねる等価な意味軸
+Fold nesting G        Fold containerを包むnesting depth
 Layer A / B / C        文書・主張の評価scope
-SDK Surface S         API入口の抽象度
+SDK Surface S         L経路を構成するSDK／toolchain入口の抽象度
 embedding dimension   vector表現の座標数
 ```
 
 IBD文書内で単に「層」と書く場合、どの軸かを明示する。FAMの`λ`、既存schemaのlegacy `layer`、port型を技術Layer `L`へ自動変換しない。
+
+正本三軸は`L / D / G`である。`S`は有効なSDK surface分類だが、Gを置換する独立三軸目ではない。
+IBDは上位Foldから渡された`fold_nesting_depth`を、SDK surface番号、database階層、FAM再帰深度から
+推定せず保持する。
 
 `4D Fold`は四つのContext Dimensionを束ねるというarityであり、四つのDatabase、四次元vector、技術Layer 4を意味しない。同じ4DでもDimension IDとRegistry revisionが異なれば互換ではない。
 
@@ -186,12 +191,13 @@ Containerized Service
 2. RegistryとContext Registerを混同しない。
 3. IBD Store、IBD Database、Storage Binding、processを同義にしない。
 4. MariaDB、Neo4j、DockerをCore意味論にしない。
-5. D数だけでFold互換性を決めない。
-6. Databaseの指定なしに横断vector検索しない。
-7. 異storeのraw scoreを直接sortしない。
-8. custom Splitterの失敗を無断fallbackで隠さない。
-9. Run TraceをOAEへ自動昇格しない。
-10. Context権限からOS／Database credentialを推定昇格しない。
+5. 正本三軸`L / D / G`を保持し、SDK surface `S`でGを置換しない。
+6. D数またはGの深さだけでFold互換性を決めない。
+7. Databaseの指定なしに横断vector検索しない。
+8. 異storeのraw scoreを直接sortしない。
+9. custom Splitterの失敗を無断fallbackで隠さない。
+10. Run TraceをOAEへ自動昇格しない。
+11. Context権限からOS／Database credentialを推定昇格しない。
 
 ## 11. Season 0で未確定
 
@@ -208,4 +214,3 @@ Containerized Service
 - [IBDSDK module契約](../specification/ibd-sdk-module-contracts.ja.md)
 - [Classification Registry、Database隔離、Routing契約](../specification/classification-registry-and-routing.ja.md)
 - [Neo4j Vector／Embedding周辺ライブラリー調査](../research/neo4j-vector-and-embedding-survey-20260718.ja.md)
-
