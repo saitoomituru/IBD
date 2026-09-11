@@ -285,6 +285,34 @@ class FamDocumentStoreTest(unittest.TestCase):
         records = store.list_oae_for_subject("evidence:obs-1")
         self.assertEqual(records[0]["envelope"]["verifier_ref"], "verifier:manual-review")
 
+    def test_oae_mechanism_stores_atlantis_portal_transformer_receipt(self):
+        # responsibility-boundary-2026-09.ja.md: IBDはPortalの必要性を判定しないが、
+        # 「Portalが実行された」というreceiptはsource改変なしで保存・検索できる。
+        # 新しいstorage primitiveは追加せず、既存のrecord_oae汎用機構で満たせることを検証する。
+        store = STORAGE.FamDocumentStore(self.root)
+        store.put(_document("fam:target", "rev-1"))
+        subject = "fam:target@rev-1"
+
+        store.record_oae(
+            subject,
+            "oae:portal-receipt-1",
+            {
+                "observer_ref": "observer:atlantis-orchestration",
+                "portal_ref": "portal://world-a-to-world-b",
+                "transformer_ref": "transformer://access-map-v3",
+                "receipt_kind": "portal-transformation",
+                "source_mutation": False,
+            },
+        )
+
+        receipts = store.list_oae_for_subject(subject)
+        self.assertEqual(len(receipts), 1)
+        envelope = receipts[0]["envelope"]
+        self.assertEqual(envelope["portal_ref"], "portal://world-a-to-world-b")
+        self.assertEqual(envelope["source_mutation"], False)
+        # sourceのl_topologyはPortal receipt記録によって変更されない
+        self.assertEqual(store.get("fam:target", "rev-1")["l_topology"], _document("fam:target", "rev-1")["l_topology"])
+
     def test_rehydrate_after_restart(self):
         store_a = STORAGE.FamDocumentStore(self.root)
         store_a.put(_document("fam:sample3-1", "rev-1"))
