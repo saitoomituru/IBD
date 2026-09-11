@@ -23,6 +23,28 @@ from typing import Any
 L_AXIS_KEYS = {"parent", "children", "siblings", "prev", "next"}
 ML_AXIS_KEYS = {"before", "after"}
 
+EVIDENCE_SCHEMA_VERSION = "ibd.evidence-observation/0.1.0-draft"
+EVIDENCE_REQUIRED_FIELDS = {
+    "schema_version",
+    "observation_id",
+    "connector_id",
+    "source_object",
+    "query_fingerprint",
+    "parameter_hash",
+    "result_hash",
+    "observed_at",
+    "dependent_branches",
+}
+EVIDENCE_ALLOWED_FIELDS = EVIDENCE_REQUIRED_FIELDS | {
+    "schema_fingerprint",
+    "row_count",
+    "source_cursor",
+    "source_max_updated_at",
+    "freshness_status",
+    "authority_scope_ref",
+}
+EVIDENCE_FRESHNESS_VALUES = {"fresh", "stale", "unknown", "unreachable"}
+
 
 class ContractError(ValueError):
     """FAM Document Storeが保存契約に違反した場合のエラー。"""
@@ -302,6 +324,92 @@ class FamDocumentStore:
         if run_ref is None:
             return entries
         return [entry for entry in entries if entry["run_ref"] == run_ref]
+
+    # -- Evidence: schemas/draft/evidence-observation.schema.jsonへ厳密準拠する --
+    # IBDはEvidenceの検証方式やfreshness判定の正しさを裁定せず、この形状で
+    # losslessに保存・再取得するだけである。schema外keyはverifier_ref等も含め
+    # 受け付けない。verifier/観測手段はOAE層(observer_ref/rule_ref)で別途表現する。
+
+    def _evidence_path(self, observation_id: str) -> Path:
+        return self.root / "evidence" / "records" / f"{observation_id}.json"
+
+    def _evidence_branch_index_path(self, branch_id: str) -> Path:
+        return self.root / "evidence" / "by-branch" / f"{branch_id}.json"
+
+    def put_evidence(self, observation: dict[str, Any]) -> dict[str, Any]:
+        missing = EVIDENCE_REQUIRED_FIELDS - observation.keys()
+        if missing:
+            raise ContractError(f"evidence observationに{sorted(missing)}が必要です")
+        unknown = observation.keys() - EVIDENCE_ALLOWED_FIELDS
+        if unknown:
+            raise ContractError(f"evidence observationに未知fieldがあります: {sorted(unknown)}")
+        if observation["schema_version"] != EVIDENCE_SCHEMA_VERSION:
+            raise ContractError(f"evidence schema_versionは{EVIDENCE_SCHEMA_VERSION}が必要です")
+        freshness = observation.get("freshness_status")
+        if freshness is not None and freshness not in EVIDENCE_FRESHNESS_VALUES:
+            raise ContractError(f"freshness_statusが未定義です: {freshness}")
+
+        stored = copy.deepcopy(observation)
+        observation_id = stored["observation_id"]
+        _write_json(self._evidence_path(observation_id), stored)
+
+        for branch_id in stored["dependent_branches"]:
+            index_path = self._evidence_branch_index_path(branch_id)
+            index = _read_json(index_path) if index_path.exists() else {"branch_id": branch_id, "observation_ids": []}
+            if observation_id not in index["observation_ids"]:
+                index["observation_ids"].append(observation_id)
+            _write_json(index_path, index)
+        return copy.deepcopy(stored)
+
+    def get_evidence(self, observation_id: str) -> dict[str, Any] | None:
+        path = self._evidence_path(observation_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def list_evidence_for_branch(self, branch_id: str) -> list[str]:
+        index_path = self._evidence_branch_index_path(branch_id)
+        if not index_path.exists():
+            return []
+        return list(_read_json(index_path)["observation_ids"])
+
+    # -- OAE: subject_ref(fam:<ref>@<revision> / evidence:<observation_id> / 任意の
+    # addressable ref)へ付与するObserver Effectを不変append-onlyで保存する。
+    # IBDはobserver_ref以外のfield(rule_ref, producer_ref, receipt_ref, verifier_ref,
+    # record_integrity, rule_conformance, observer_verdict等)の意味・正しさを裁定
+    # せず、与えられたfieldを別fieldのままlosslessに保存する。同一subjectへの
+    # 複数Observerの相反するverdictも上書きせず並存させる。
+
+    def _oae_record_path(self, oae_ref: str) -> Path:
+        return self.root / "oae" / "records" / f"{oae_ref}.json"
+
+    def _oae_subject_index_path(self, subject_ref: str) -> Path:
+        return self.root / "oae" / "by-subject" / f"{subject_ref.replace('/', '_')}.jsonl"
+
+    def record_oae(self, subject_ref: str, oae_ref: str, envelope: dict[str, Any]) -> dict[str, Any]:
+        if "observer_ref" not in envelope:
+            raise ContractError("OAE envelopeにはobserver_refが必要です")
+        if self._oae_record_path(oae_ref).exists():
+            raise ContractError(f"oae_refは不変です。再record不可: {oae_ref}")
+
+        stored = {
+            "oae_ref": oae_ref,
+            "subject_ref": subject_ref,
+            "recorded_at": _utc_now(),
+            "envelope": copy.deepcopy(envelope),
+        }
+        _write_json(self._oae_record_path(oae_ref), stored)
+        _append_jsonl(self._oae_subject_index_path(subject_ref), stored)
+        return copy.deepcopy(stored)
+
+    def get_oae(self, oae_ref: str) -> dict[str, Any] | None:
+        path = self._oae_record_path(oae_ref)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def list_oae_for_subject(self, subject_ref: str) -> list[dict[str, Any]]:
+        return _read_jsonl(self._oae_subject_index_path(subject_ref))
 
     def _unknown_last_order(
         self, fam_ref: str, reason_code: str, revision_ref: str | None = None

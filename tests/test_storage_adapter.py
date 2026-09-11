@@ -185,6 +185,106 @@ class FamDocumentStoreTest(unittest.TestCase):
         child_2 = next(node for node in graph_2["nodes"] if node["fam_ref"] == "fam:child")
         self.assertEqual(child_1, child_2)
 
+    def _evidence(self, observation_id, branches=("branch-1",), freshness="fresh"):
+        return {
+            "schema_version": "ibd.evidence-observation/0.1.0-draft",
+            "observation_id": observation_id,
+            "connector_id": "connector:test",
+            "source_object": "table:test",
+            "query_fingerprint": "fp:test",
+            "parameter_hash": "hash:params",
+            "result_hash": "hash:result",
+            "observed_at": "2026-09-11T00:00:00+00:00",
+            "dependent_branches": list(branches),
+            "freshness_status": freshness,
+        }
+
+    def test_put_evidence_requires_required_fields(self):
+        store = STORAGE.FamDocumentStore(self.root)
+        incomplete = self._evidence("obs-1")
+        del incomplete["result_hash"]
+        with self.assertRaises(STORAGE.ContractError):
+            store.put_evidence(incomplete)
+
+    def test_put_evidence_rejects_unknown_fields(self):
+        store = STORAGE.FamDocumentStore(self.root)
+        observation = self._evidence("obs-1")
+        observation["verifier_ref"] = "verifier:leaked"
+        with self.assertRaises(STORAGE.ContractError):
+            store.put_evidence(observation)
+
+    def test_put_evidence_rejects_bad_freshness(self):
+        store = STORAGE.FamDocumentStore(self.root)
+        observation = self._evidence("obs-1", freshness="definitely-fresh")
+        with self.assertRaises(STORAGE.ContractError):
+            store.put_evidence(observation)
+
+    def test_evidence_get_and_branch_index(self):
+        store = STORAGE.FamDocumentStore(self.root)
+        store.put_evidence(self._evidence("obs-1", branches=["branch-1", "branch-2"]))
+        store.put_evidence(self._evidence("obs-2", branches=["branch-1"]))
+
+        self.assertEqual(store.get_evidence("obs-1")["observation_id"], "obs-1")
+        self.assertIsNone(store.get_evidence("obs-missing"))
+        self.assertEqual(store.list_evidence_for_branch("branch-1"), ["obs-1", "obs-2"])
+        self.assertEqual(store.list_evidence_for_branch("branch-2"), ["obs-1"])
+        self.assertEqual(store.list_evidence_for_branch("branch-none"), [])
+
+    def test_record_oae_requires_observer_ref(self):
+        store = STORAGE.FamDocumentStore(self.root)
+        with self.assertRaises(STORAGE.ContractError):
+            store.record_oae("fam:sample3-1@rev-1", "oae:1", {"rule_ref": "rule:x"})
+
+    def test_record_oae_is_immutable(self):
+        store = STORAGE.FamDocumentStore(self.root)
+        store.record_oae("fam:sample3-1@rev-1", "oae:1", {"observer_ref": "observer:a"})
+        with self.assertRaises(STORAGE.ContractError):
+            store.record_oae("fam:sample3-1@rev-1", "oae:1", {"observer_ref": "observer:b"})
+
+    def test_record_oae_preserves_conflicting_observer_verdicts(self):
+        store = STORAGE.FamDocumentStore(self.root)
+        subject = "fam:sample3-1@rev-1"
+        store.record_oae(
+            subject,
+            "oae:observer-a",
+            {
+                "observer_ref": "observer:a",
+                "rule_ref": "rule:x",
+                "record_integrity": "satisfied",
+                "rule_conformance": "satisfied",
+                "observer_verdict": "valid",
+            },
+        )
+        store.record_oae(
+            subject,
+            "oae:observer-b",
+            {
+                "observer_ref": "observer:b",
+                "rule_ref": "rule:y",
+                "record_integrity": "satisfied",
+                "rule_conformance": "not-satisfied",
+                "observer_verdict": "invalid",
+            },
+        )
+
+        records = store.list_oae_for_subject(subject)
+        self.assertEqual(len(records), 2)
+        verdicts = {record["envelope"]["observer_verdict"] for record in records}
+        self.assertEqual(verdicts, {"valid", "invalid"})
+        self.assertEqual(store.get_oae("oae:observer-a")["envelope"]["observer_ref"], "observer:a")
+        self.assertEqual(store.list_oae_for_subject("fam:unrelated@rev-1"), [])
+
+    def test_oae_can_attach_to_evidence_subject(self):
+        store = STORAGE.FamDocumentStore(self.root)
+        store.put_evidence(self._evidence("obs-1"))
+        store.record_oae(
+            "evidence:obs-1",
+            "oae:verify-1",
+            {"observer_ref": "observer:verifier", "verifier_ref": "verifier:manual-review"},
+        )
+        records = store.list_oae_for_subject("evidence:obs-1")
+        self.assertEqual(records[0]["envelope"]["verifier_ref"], "verifier:manual-review")
+
     def test_rehydrate_after_restart(self):
         store_a = STORAGE.FamDocumentStore(self.root)
         store_a.put(_document("fam:sample3-1", "rev-1"))
