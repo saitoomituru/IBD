@@ -1,7 +1,7 @@
 # Query FAMとComposite FAM契約
 
-状態: `[DRAFT]` `[SEASON-0]`  
-更新日: 2026-07-18
+状態: `[DRAFT]` `[SEASON-0]` `[2026-09-CORRECTIVE]`  
+更新日: 2026-09-10
 
 ## 1. Query FAM
 
@@ -28,6 +28,8 @@ query_fam:
 ```
 
 ∇φは空でもよい。その場合、IBDはψとλ、Qに適合する既知の探索技候補を返す。λは生成物の形式だけでなく、何のために探索するかを保持する。
+
+FQueryのselector / traversal文法はIBDが制定しない。IBDはFQueryが解決したquery intentまたはselector ASTをstorage adapterへ写像するconsumerである。
 
 ## 2. Composite FAM
 
@@ -109,3 +111,43 @@ local_retrieval_run:
 - mix結果の永続化は新しいSchema Bundleとして明示する
 - derived relationにはsource、mapping、Q、versionを付ける
 - キャッシュを正本にしない
+
+## 7. FQuery 2026-09 selector / traversal境界
+
+FQuery正本では、少なくとも次を分離する。
+
+```text
+self = current FAM module
+this = current node
+
+L-axis structural traversal
+  parent / children / siblings / prev / next
+
+mL-axis semantic-processing traversal
+  before / after
+```
+
+IBDはこの意味を再定義しない。
+
+- `prev / next`を実行履歴へ変換しない
+- `before / after`を静的な隣接nodeへ丸めない
+- mL runtime traceはrun / revisionごとに別recordとして保存できる
+- L topologyとmL traceの双方を同じedge種へ潰さない
+- `this.after.エレメンタル`等のselectorを、意味Dimension遷移commandとして解釈しない
+
+意味Dimensionを変更する操作、Fold越境、World間変換はAccess Map / Transformer / Atlantis側の責務であり、IBD query plannerがselector文字列から暗黙生成しない。
+
+## 8. refFAMとfactの境界
+
+refFAMは共有fact tableではない。fact-freeなontology、epistemology、問い方、分類法、成立条件、検証手続きを保持する。
+
+```text
+ordinary FAM = fact / observation / state / experience
+refFAM       = metaphysical / epistemic reusable method
+```
+
+IBDは双方を保存できるが、factをrefFAMへ昇格したり、refFAMの規則に合わせてfactを改変したりしない。異なるrefFAM間の衝突はIBDが勝敗判定せず、scopeとprovenanceを保持して上位Systemへ返す。
+
+## 9. 現行責務文書
+
+2026-09以降の横断責務は[`../architecture/responsibility-boundary-2026-09.ja.md`](../architecture/responsibility-boundary-2026-09.ja.md)を参照する。
