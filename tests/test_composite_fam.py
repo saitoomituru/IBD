@@ -1,4 +1,5 @@
 import importlib.util
+import json
 import sys
 import tempfile
 import unittest
@@ -6,6 +7,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+COMPOSITE_FAM_SCHEMA = json.loads((ROOT / "schemas" / "draft" / "composite-fam.schema.json").read_text(encoding="utf-8"))
 
 STORAGE_PATH = ROOT / "experiments" / "season0" / "storage_adapter.py"
 STORAGE_SPEC = importlib.util.spec_from_file_location("season0_storage_adapter", STORAGE_PATH)
@@ -162,15 +164,33 @@ class ComposeFamTest(unittest.TestCase):
         self.assertEqual(result["evidence_bindings"], ["obs-1"])
         self.assertIn({"evidence_ref": "obs-missing", "reason": "EVIDENCE-NOT-FOUND"}, result["unresolved_slots"])
 
-    def test_compose_does_not_claim_schema_conformance(self):
+    def test_compose_conforms_to_composite_fam_schema_top_level_shape(self):
+        # jsonschemaライブラリへ依存せず、schemaのrequired/additionalProperties:falseを
+        # 手動で再現して構造適合を検証する(他のschema draftも同じ手動検証styleに合わせる)。
         self.store.put(_document("fam:a", "rev-1"))
         result = COMPOSITE.compose(
             self.store,
             "query:1",
             [{"fam_ref": "fam:a", "revision_policy": {"mode": "latest"}, "role": "fam"}],
         )
-        self.assertTrue(result["schema_status"].startswith("PROVISIONAL-NOT-UNIFIED"))
-        self.assertNotIn("schema_version", result)
+
+        self.assertEqual(result["schema_version"], COMPOSITE_FAM_SCHEMA["properties"]["schema_version"]["const"])
+        required = set(COMPOSITE_FAM_SCHEMA["required"])
+        allowed = set(COMPOSITE_FAM_SCHEMA["properties"].keys())
+        self.assertTrue(required.issubset(result.keys()), f"missing required keys: {required - result.keys()}")
+        self.assertTrue(set(result.keys()).issubset(allowed), f"unknown keys: {set(result.keys()) - allowed}")
+
+        nabla_phi_schema = COMPOSITE_FAM_SCHEMA["properties"]["∇φ"]
+        self.assertTrue(set(nabla_phi_schema["required"]).issubset(result["∇φ"].keys()))
+
+    def test_compose_leaves_unimplemented_match_retrieval_empty_not_fabricated(self):
+        self.store.put(_document("fam:a", "rev-1"))
+        result = COMPOSITE.compose(
+            self.store,
+            "query:1",
+            [{"fam_ref": "fam:a", "revision_policy": {"mode": "latest"}, "role": "fam"}],
+        )
+        self.assertEqual(result["local_retrieval_runs"], [])
 
 
 if __name__ == "__main__":

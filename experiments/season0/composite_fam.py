@@ -2,16 +2,24 @@
 """Issue #4向けComposite FAM binder参照実装。
 
 `docs/specification/fam-query-and-composition.ja.md`(2026-09-10、
-`[2026-09-CORRECTIVE]`)の§2 Composite FAM形状に従う。
+`[2026-09-CORRECTIVE]`)の§2形状、および`schemas/draft/
+composite-fam.schema.json`(0.2.0-draft、同narrativeへ統一済み)に従う。
 
-既知の未統一points（勝手に解決しない）:
-  `schemas/draft/composite-fam.schema.json`は本モジュールと異なる旧形状
-  (`source_clusters`必須、`assembly_graph`がtop-level、`last_order_refs`等)
-  を持つ。`reference_harness.py`の実出力(`schema_version:
-  "ibd.reference-harness-result/0.1.0-draft"`)もこの2つのいずれとも
-  一致しない。3者の統一はUser判断が必要な仕様制定/矛盾解決点であり、
-  本モジュールはこのschema_versionへの適合を主張しない
-  (`schema_status`フィールドで明示する)。
+2026-09-11 統一receipt:
+  旧0.1.0-draft schema(`source_clusters`必須、DB/vector cluster検索専用)
+  とnarrative §2(`∇φ.modules`形状)の不一致を、ZeroRoomLab-manifest
+  `note/narrative/情報子工学マガジン_FOLD本文.md` 3.3節のFIT/MATCH/SELECT
+  語彙で解釈し統一した。`∇φ.modules`/`assembly_graph`はFIT(構造一致)、
+  `local_retrieval_runs`はMATCH(ベクトル近傍)、`evidence_bindings`は
+  SELECT(fact pointer)に対応し、3つは互いに排他ではなく同じComposite FAM
+  envelopeの中で並立する別種の探索結果として保持する。本moduleは
+  FITとSELECT(+OAE)だけを実装し、MATCH(vector近傍検索)は実装しない
+  ため`local_retrieval_runs`は常に空配列を返す(未実装を実装済みに
+  見せない)。`reference_harness.py`の独自出力(DB/cluster/vector検索、
+  `schema_version: "ibd.reference-harness-result/0.1.0-draft"`)は
+  MATCH/SELECT寄りの別実装として残し、本moduleへの統合は行っていない
+  (両者は同じstore抽象class契約の異なる実装候補であり、統合の要否は
+  別途の判断とする)。
 
 本binderはstorage_adapter.FamDocumentStoreの上で、Qが明示した
 mappingだけを解決する。selector文字列からFold境界を暗黙生成せず
@@ -125,7 +133,7 @@ def compose(
 
     composite_fam_id = f"fam:composite:{uuid.uuid4()}"
     result = {
-        "schema_status": "PROVISIONAL-NOT-UNIFIED-WITH-schemas/draft/composite-fam.schema.json",
+        "schema_version": "ibd.composite-fam/0.2.0-draft",
         "composite_fam_id": composite_fam_id,
         "query_ref": query_ref,
         "ψ": copy.deepcopy(psi) if psi is not None else {},
@@ -133,7 +141,7 @@ def compose(
         "λ": copy.deepcopy(lam) if lam is not None else {},
         "Q": copy.deepcopy(q) if q is not None else {},
         "evidence_bindings": evidence_bindings,
-        "local_retrieval_runs": [],
+        "local_retrieval_runs": [],  # MATCH(vector近傍)は本moduleが実装しないため常に空
         "transformation_receipts": [],
         "oae_refs": oae_refs,
         "last_orders": last_orders,

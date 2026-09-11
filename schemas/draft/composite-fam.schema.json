@@ -2,36 +2,70 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://zeroroomlab.example/ibd/season-0/composite-fam.schema.json",
   "title": "IBD Composite FAM Season 0 Draft",
+  "$comment": "0.2.0: docs/specification/fam-query-and-composition.ja.md §2 (2026-09-10, [2026-09-CORRECTIVE]) の形状へ統一した。旧0.1.0-draftのsource_clusters必須形状(cluster/vector検索専用)から、∇φ.modules(構造一致=FIT)・local_retrieval_runs(ベクトル近傍=MATCH)・evidence_bindings(fact pointer=SELECT)を並立させる形状へ移行した。根拠: ZeroRoomLab-manifest note/narrative/情報子工学マガジン_FOLD本文.md 3.3節(FIT/MATCH/SELECTは真理の分類ではなく探索方法の語彙であり、AST/leaf shape等の細部は実装しながらfixtureとtestで固めてよいとする明示的licenseに従い、leaf itemはtypeだけを固定しopen-worldに保つ)。旧0.1.0-draft形状はexperiments/season0/reference_harness.pyの独自出力(schema_version: ibd.reference-harness-result/0.1.0-draft)として別途存在し、本schemaへの適合は主張していない。両者の統合は別途の判断とする。",
   "type": "object",
-  "required": ["schema_version", "composite_fam_id", "query_ref", "ψ", "∇φ", "λ", "Q", "source_clusters", "assembly_graph", "provenance"],
+  "required": [
+    "schema_version",
+    "composite_fam_id",
+    "query_ref",
+    "ψ",
+    "∇φ",
+    "λ",
+    "Q",
+    "evidence_bindings",
+    "local_retrieval_runs",
+    "transformation_receipts",
+    "oae_refs",
+    "last_orders",
+    "unresolved_slots",
+    "provenance"
+  ],
   "properties": {
-    "schema_version": {"const": "ibd.composite-fam/0.1.0-draft"},
+    "schema_version": {"const": "ibd.composite-fam/0.2.0-draft"},
     "composite_fam_id": {"type": "string", "minLength": 1},
     "query_ref": {"type": "string", "minLength": 1},
     "ψ": {"type": "object"},
-    "∇φ": {"type": "object"},
+    "∇φ": {
+      "type": "object",
+      "required": ["modules", "assembly_graph"],
+      "properties": {
+        "modules": {
+          "type": "array",
+          "items": {"type": "object"},
+          "description": "FIT(構造一致)結果。fam_ref/revision_ref/role(fam|refFAM)単位で、field-level mergeせず並立させる。"
+        },
+        "assembly_graph": {
+          "type": "array",
+          "items": {"type": "object"},
+          "description": "modules間の明示関係のみ。mappingで未requestのfam_refを暗黙解決した結果を含めない。"
+        }
+      },
+      "additionalProperties": true
+    },
     "λ": {"type": "object"},
     "Q": {"type": "object"},
-    "source_clusters": {
+    "evidence_bindings": {
       "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["cluster_ref", "database_ref", "content_hash"],
-        "properties": {
-          "cluster_ref": {"type": "string"},
-          "database_ref": {"type": "string", "pattern": "^ibd://"},
-          "content_hash": {"type": "string"}
-        },
-        "additionalProperties": false
-      }
+      "items": {"type": "string"},
+      "description": "SELECT(fact pointer)結果。schemas/draft/evidence-observation.schema.jsonのobservation_idを指す。"
     },
-    "mapping_fam_refs": {"type": "array", "items": {"type": "string"}},
-    "assembly_graph": {"type": "array", "items": {"type": "object"}},
-    "evidence_bindings": {"type": "array", "items": {"type": "string"}},
-    "last_order_refs": {"type": "array", "items": {"type": "string"}},
-    "unresolved_slots": {"type": "array", "items": {"type": "object"}},
-    "source_mutation": {"const": false},
-    "provenance": {"type": "object"}
+    "local_retrieval_runs": {
+      "type": "array",
+      "items": {"type": "object"},
+      "description": "MATCH(ベクトル近傍)結果。storage_binding_ref/embedding_profile_ref/metric/raw_score等はfam-query-and-composition.ja.md §5参照。calibrationなしのraw scoreをDatabase横断で直接比較しない。"
+    },
+    "transformation_receipts": {"type": "array", "items": {"type": "object"}},
+    "oae_refs": {"type": "array", "items": {"type": "string"}},
+    "last_orders": {"type": "array", "items": {"type": "object"}},
+    "unresolved_slots": {
+      "type": "array",
+      "items": {"type": "object"},
+      "description": "未解決sourceを黙って落とさず保持する。"
+    },
+    "provenance": {
+      "type": "object",
+      "description": "source_mutation: falseを含め、non-destructive性の根拠をここへ保持する(§6)。"
+    }
   },
   "additionalProperties": false
 }
