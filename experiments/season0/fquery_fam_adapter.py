@@ -86,6 +86,39 @@ def fquery_decomposition_fam_to_storage_document(fam: dict[str, Any]) -> dict[st
     }
 
 
+def persist_fquery_nonlinear_observations(store: Any, replay_fixture: dict[str, Any]) -> list[dict[str, Any]]:
+    """FQuery `@fquery/benchmark`のNonlinearObserverOae群(fquery.nonlinear-replay/
+    0.1.0-draft)を、対応するFAM subjectへIBD OAE storeとして永続化する。
+
+    Issue #42が要求する永続化対象(observer_ref/oae_rule_ref/source revision/
+    candidate FAM revision/verdict branch/receipt)をlosslessなenvelopeとして
+    保存する。IBDはobserver_verdictの意味的正しさを裁定しない(record_oaeの
+    既存契約どおり)。同一subjectへの複数(相反する)observationも上書きせず
+    並存させる。
+    """
+
+    if replay_fixture.get("schema_version") != "fquery.nonlinear-replay/0.1.0-draft":
+        raise ContractError("fquery.nonlinear-replay/0.1.0-draft以外のfixtureはこのadapterで扱いません")
+    observations = replay_fixture.get("observations")
+    if not isinstance(observations, list) or len(observations) < 2:
+        raise ContractError("observationsは2件以上のarrayが必要です")
+
+    recorded: list[dict[str, Any]] = []
+    for observation in observations:
+        if observation.get("schemaVersion") != "fquery.nonlinear-observer-oae/0.1.0-draft":
+            raise ContractError(f"未対応のOAE schemaVersionです: {observation.get('schemaVersion')!r}")
+        candidate_ref = observation["candidateRef"]
+        candidate_revision_ref = observation["candidateRevisionRef"]
+        subject_ref = f"{candidate_ref}@{candidate_revision_ref}"
+        # FQuery(TypeScript)はcamelCase、IBD storage_adapter.record_oaeは
+        # observer_ref(snake_case)を要求する。IBD側の必須keyを追加しつつ、
+        # 元のcamelCase fieldも消さずlosslessに残す。
+        envelope = {key: value for key, value in observation.items() if key != "oaeRef"}
+        envelope["observer_ref"] = observation["observerRef"]
+        recorded.append(store.record_oae(subject_ref, observation["oaeRef"], envelope))
+    return recorded
+
+
 def _find_ref_values(value: Any, keys: tuple[str, ...]) -> list[str]:
     found: list[str] = []
 

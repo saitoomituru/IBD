@@ -87,6 +87,32 @@ class FQueryFamAdapterRoundTripTest(unittest.TestCase):
         self.assertEqual(resolved["status"], "resolved")
         self.assertEqual(resolved["document"]["source_document"]["title"], self.candidate_a["title"])
 
+    def test_persists_real_nonlinear_observer_oae_pair_as_non_destructive_oae_records(self):
+        # experiments/season0/fixtures/fquery-live-candidates/nonlinear-observer-comparison.json は
+        # FQuery main(commit c0d5873)へ実際にcommitされた2-candidate gestalt比較fixtureそのもの。
+        with (FIXTURES / "nonlinear-observer-comparison.json").open("r", encoding="utf-8") as stream:
+            replay_fixture = json.load(stream)
+
+        self.store.put(ADAPTER.fquery_decomposition_fam_to_storage_document(self.candidate_a))
+        self.store.put(ADAPTER.fquery_decomposition_fam_to_storage_document(self.candidate_b))
+        recorded = ADAPTER.persist_fquery_nonlinear_observations(self.store, replay_fixture)
+        self.assertEqual(len(recorded), 2)
+
+        subject_a = f"{self.candidate_a['fam_id']}@{self.candidate_a['revision_id']}"
+        subject_b = f"{self.candidate_b['fam_id']}@{self.candidate_b['revision_id']}"
+        oae_a = self.store.list_oae_for_subject(subject_a)
+        oae_b = self.store.list_oae_for_subject(subject_b)
+        self.assertEqual(len(oae_a), 1)
+        self.assertEqual(len(oae_b), 1)
+        self.assertEqual(oae_a[0]["envelope"]["observerRef"], "observer://anthropic/claude-code/current-session")
+        self.assertEqual(oae_b[0]["envelope"]["observerRef"], "observer://google/gemini-3.5-flash/live-api")
+        # 相反しうるverdictも上書きせず、それぞれ別subjectへ非破壊で並存する
+        self.assertNotEqual(oae_a[0]["envelope"]["observerVerdict"], oae_b[0]["envelope"]["observerVerdict"])
+
+        # 再record(同じoaeRef)は不変性違反としてContractError
+        with self.assertRaises(STORAGE.ContractError):
+            ADAPTER.persist_fquery_nonlinear_observations(self.store, replay_fixture)
+
     def test_rejects_non_decomposition_kind(self):
         with self.assertRaises(ADAPTER.ContractError):
             ADAPTER.fquery_decomposition_fam_to_storage_document({"kind": "access-map", "fam_id": "x", "revision_id": "1", "λ": {}})
