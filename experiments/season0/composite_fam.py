@@ -1,0 +1,147 @@
+#!/usr/bin/env python3
+"""Issue #4向けComposite FAM binder参照実装。
+
+`docs/specification/fam-query-and-composition.ja.md`(2026-09-10、
+`[2026-09-CORRECTIVE]`)の§2 Composite FAM形状に従う。
+
+既知の未統一points（勝手に解決しない）:
+  `schemas/draft/composite-fam.schema.json`は本モジュールと異なる旧形状
+  (`source_clusters`必須、`assembly_graph`がtop-level、`last_order_refs`等)
+  を持つ。`reference_harness.py`の実出力(`schema_version:
+  "ibd.reference-harness-result/0.1.0-draft"`)もこの2つのいずれとも
+  一致しない。3者の統一はUser判断が必要な仕様制定/矛盾解決点であり、
+  本モジュールはこのschema_versionへの適合を主張しない
+  (`schema_status`フィールドで明示する)。
+
+本binderはstorage_adapter.FamDocumentStoreの上で、Qが明示した
+mappingだけを解決する。selector文字列からFold境界を暗黙生成せず
+(§7)、fact/refFAMの内容をmergeしない(§8)。
+"""
+
+from __future__ import annotations
+
+import copy
+import hashlib
+import json
+import uuid
+from typing import Any
+
+
+class ContractError(ValueError):
+    """Composite FAM合成契約に違反した場合のエラー。"""
+
+
+def _canonical_hash(value: Any) -> str:
+    encoded = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return "sha256:" + hashlib.sha256(encoded).hexdigest()
+
+
+def _subject_ref(fam_ref: str, revision_ref: str) -> str:
+    """storage_adapter.record_oaeが使うsubject_ref規約(`<fam_ref>@<revision_ref>`)に合わせる。"""
+
+    return f"{fam_ref}@{revision_ref}"
+
+
+def compose(
+    store: Any,
+    query_ref: str,
+    mapping: list[dict[str, Any]],
+    psi: dict[str, Any] | None = None,
+    lam: dict[str, Any] | None = None,
+    q: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Qが明示したmappingだけをresolveし、非破壊のComposite FAMを返す。
+
+    mapping各entryは{"fam_ref", "revision_policy", "role"}を必須とする。
+    roleは"fam"または"refFAM"で呼び出し側が明示し、IBDは推論しない。
+    未解決slotは黙って捨てず、unresolved_slots + last_ordersへ残す。
+    """
+
+    if not mapping:
+        raise ContractError("composeには最低1件のmapping entryが必要です")
+
+    modules: list[dict[str, Any]] = []
+    unresolved_slots: list[dict[str, Any]] = []
+    last_orders: list[dict[str, Any]] = []
+    oae_refs: list[str] = []
+    evidence_bindings: list[str] = []
+    resolved_fam_refs: set[str] = set()
+
+    for entry in mapping:
+        for required in ("fam_ref", "revision_policy", "role"):
+            if required not in entry:
+                raise ContractError(f"mapping entryに{required}が必要です")
+        if entry["role"] not in ("fam", "refFAM"):
+            raise ContractError(f"roleはfamまたはrefFAMが必要です: {entry['role']}")
+
+        fam_ref = entry["fam_ref"]
+        resolution = store.resolve(fam_ref, entry["revision_policy"])
+        if resolution["status"] != "resolved":
+            unresolved_slots.append(
+                {
+                    "fam_ref": fam_ref,
+                    "requested_role": entry["role"],
+                    "revision_policy": entry["revision_policy"],
+                    "reason": resolution["last_order"]["reason"]["code"],
+                }
+            )
+            last_orders.append(resolution["last_order"])
+            continue
+
+        revision_ref = resolution["revision_ref"]
+        resolved_fam_refs.add(fam_ref)
+        modules.append(
+            {
+                "fam_ref": fam_ref,
+                "revision_ref": revision_ref,
+                "role": entry["role"],
+                "l_topology": resolution["document"]["l_topology"],
+                "provenance": resolution["document"].get("provenance", {}),
+            }
+        )
+
+        subject = _subject_ref(fam_ref, revision_ref)
+        for oae_record in store.list_oae_for_subject(subject):
+            oae_refs.append(oae_record["oae_ref"])
+
+        for evidence_ref in entry.get("evidence_refs", []):
+            if store.get_evidence(evidence_ref) is not None:
+                evidence_bindings.append(evidence_ref)
+            else:
+                unresolved_slots.append(
+                    {"evidence_ref": evidence_ref, "reason": "EVIDENCE-NOT-FOUND"}
+                )
+
+    # assembly_graphはmapping内で明示的に要求されたfam_ref同士の関係だけを表す。
+    # fold_refsを辿って未要求のfam_refを新規解決しない(§7: 暗黙のFold越境をしない)。
+    assembly_graph: list[dict[str, Any]] = []
+    for module in modules:
+        document = store.get(module["fam_ref"], module["revision_ref"])
+        for fold_ref in document.get("fold_refs", []):
+            if fold_ref["fam_ref"] in resolved_fam_refs:
+                assembly_graph.append(
+                    {"from_fam_ref": module["fam_ref"], "to_fam_ref": fold_ref["fam_ref"]}
+                )
+
+    composite_fam_id = f"fam:composite:{uuid.uuid4()}"
+    result = {
+        "schema_status": "PROVISIONAL-NOT-UNIFIED-WITH-schemas/draft/composite-fam.schema.json",
+        "composite_fam_id": composite_fam_id,
+        "query_ref": query_ref,
+        "ψ": copy.deepcopy(psi) if psi is not None else {},
+        "∇φ": {"modules": modules, "assembly_graph": assembly_graph},
+        "λ": copy.deepcopy(lam) if lam is not None else {},
+        "Q": copy.deepcopy(q) if q is not None else {},
+        "evidence_bindings": evidence_bindings,
+        "local_retrieval_runs": [],
+        "transformation_receipts": [],
+        "oae_refs": oae_refs,
+        "last_orders": last_orders,
+        "unresolved_slots": unresolved_slots,
+        "provenance": {
+            "resolver": "ibd-season0-composite-fam-binder",
+            "source_mutation": False,
+            "mapping_hash": _canonical_hash(mapping),
+        },
+    }
+    return result
