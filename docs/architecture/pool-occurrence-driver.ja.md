@@ -124,10 +124,22 @@ IBD(決定論仕事)
   Pool Occurrenceとadapterに指定された実行結果を
   証跡(receipt: どのoccurrence、どのadapter、どの入出力、どの結果)として記録する
 
-FQuery / 上位system(解釈・判断)
-  IBDの証跡を受け取り、OAEを発行する
-  (Observer/Recorder/Interpreter/Initiator/Executor/Transformer/
-   Causal Contributorのrole付与、SIN評価、weight統合の承認等)
+FQuery Core(型のみ)
+  OAE receiptの型(shape)を持つが、判定・発行はしない
+  実装確認済み: FQuery `packages/core/src/types.ts`が
+  `OaeConstraintEvaluationReceipt`型を定義。`packages/plugin-sdk/src/
+  oae-evaluator.ts`のコメントに明記「Coreはこの判定を呼ばず、返された
+  OAEを保存する。domain ruleの中身とObserver verdictの真偽は、この
+  helperも裁定しない」
+
+FQuery Plugin(発行)
+  IBDの証跡を受け取り、実際にOAEを構成・発行するのはplugin
+  (plugin-sdkのevaluator helperを使うが、helper自体も真偽は裁定しない)
+
+Sphere(SphereOS Atlantis)/Astro(SphereASTRO)(意味論の最終的な所有者)
+  Observer/Recorder/Interpreter/Initiator/Executor/Transformer/
+  Causal Contributorのrole定義、domain ruleの内容、Observer verdictの
+  真偽という「OAEの意味」自体はさらに上位のSphere/Astroへ委譲される
 
 上位system(さらに外側)
   IAM(identity/access management)、authority policy
@@ -135,9 +147,9 @@ FQuery / 上位system(解釈・判断)
   (`context-dimension-os-and-ibdsdk.ja.md`§4と同じ境界)
 ```
 
-SsC(§8、`ibd-sdk-module-contracts.ja.md`)への適用: calibration profileの機械的適用(local raw score ↔ meta SIN変換の実行)はIBD側receiptとして保持できるが、calibrated SINを「一致」「閾値超過」等として評価する行為はFQuery側が行い、その行為自体をFQuery側がOAEとして発行する。
+SsC(§8、`ibd-sdk-module-contracts.ja.md`)への適用: calibration profileの機械的適用(local raw score ↔ meta SIN変換の実行)はIBD側receiptとして保持できるが、calibrated SINを「一致」「閾値超過」等として評価する行為はFQuery pluginが行い、その行為自体をpluginがOAEとして発行する(evaluator helperは受け取ったOAEの構造を検証するのみで真偽は裁定しない)。
 
-weight統合(Composite Resolverのfusion policy)への適用: 重み付け統合は決定論で閉じないため、どのrefFAMのどのQがこの統合を認可したかをFQuery側がOAEとして発行する。IBDはfusion policyの実行結果(fusion rank)をreceiptとして保持するのみで、そのpolicyの正当性は判断しない。
+weight統合(Composite Resolverのfusion policy)への適用: 重み付け統合は決定論で閉じないため、どのrefFAMのどのQがこの統合を認可したかをFQuery pluginがOAEとして発行する。IBDはfusion policyの実行結果(fusion rank)をreceiptとして保持するのみで、そのpolicyの正当性は判断しない。FQuery Core自身もそのpolicyの正当性は判断せず、OAE receiptの型だけを保証する。
 
 ### 7.3 鳥卵パラドクス問題
 
