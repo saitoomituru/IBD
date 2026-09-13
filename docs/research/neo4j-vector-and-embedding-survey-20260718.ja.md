@@ -1,12 +1,18 @@
 # Neo4j Vector／Embedding周辺ライブラリー調査
 
-状態: `[RESEARCH]` `[SEASON-0]` `[OWNERSHIP-OPEN]`  
-観測日: 2026-07-18  
+状態: `[RESEARCH]` `[SEASON-0]` `[PRODUCT-SELECTION-OPEN]`  
+観測日: 2026-07-18(用語更新: 2026-09-14)  
 主対象: Neo4j 2026.06、埋め込み実行系、類似検索、再順位付け、検索評価
+
+## 用語更新について(2026-09-14追記)
+
+本文書は2026-09-13の「FAM Splitter → Pool Occurrence Driver」改称(`docs/architecture/pool-occurrence-driver.ja.md`)より前(2026-07-18)に書かれたため、以下「FAMスプリッター」という表記は現在の正式名称`Pool Occurrence Driver`を指す。内容自体(候補発見・検索engine比較)はPool Occurrence DriverのMATCH occurrence(ベクトル近傍)の射程に収まっており、DeFold(FQuery側のFAM構造分解・編集責務)とは無関係なため、改称による内容面の訂正は不要。
+
+また当時「どのリポジトリーが埋め込み生成前の分類・分割を所有するかは未決」としていたrepository-ownership自体は、2026-09-13の改称でIBD(Pool Occurrence Driver)が所有すると確定した。未決のまま残るのは、**どの製品・engineを採用するか**という選定判断のみである(状態を`OWNERSHIP-OPEN`から`PRODUCT-SELECTION-OPEN`へ更新)。
 
 ## 1. 調査範囲と結論
 
-この文書は第三者製品・ライブラリーの調査であり、FAMスプリッター、分類機、Registry拡張の実装仕様ではない。FAMスプリッターは別プロジェクトへ分離する可能性を残し、どのリポジトリーが埋め込み生成前の分類・分割を所有するかは未決とする。
+この文書は第三者製品・ライブラリーの調査であり、Pool Occurrence Driver、分類機、Registry拡張の実装仕様ではない。どの製品・engineを採用するかは未決とする。
 
 調査結果は次のとおりである。
 
@@ -15,7 +21,7 @@
 - 埋め込み生成はNeo4j GenAI Pluginへ固定されない。Sentence Transformers、Text Embeddings Inference、FastEmbed、Infinity、Ollama、llama.cpp等を同じ比較面へ置ける。
 - 検索器の比較にはFaissのexact searchを正解集合の基準にし、Neo4j、hnswlib、USearch等のANN結果をRecallで測る構成が扱いやすい。
 - 製品互換性は「同じ次元数」や「同じmodel名」だけでは成立しない。入力template、query／document task、tokenizer、pooling、正規化、切り詰め、次元短縮、量子化、runtime revisionまで含む生成pipelineの一致が必要である。
-- どの分類を混ぜるか、何をfactとするか、どの候補集合を探索するかはこの調査の対象外であり、上位システムまたは将来のFAMスプリッター側の契約で決める。
+- どの分類を混ぜるか、何をfactとするか、どの候補集合を探索するかはこの調査の対象外であり、上位システムまたは将来のPool Occurrence Driver側の契約で決める。
 
 したがってPhase 0の次の一手は、製品採用ではなく、同一の人工評価集合と同一の生成済みvectorを使った相互比較である。
 
@@ -41,7 +47,7 @@ Cypher 25では[`SEARCH`](https://neo4j.com/docs/cypher-manual/current/clauses/s
 
 `SEARCH`内の`WHERE`は条件を満たす候補が`LIMIT`件見つかるまで索引内で探索する。一方、通常の`MATCH ... WHERE`はANN結果へのpost-filterになり、要求件数より少なくなる場合がある。2026.06では索引内filterの`IN`も使用できる。
 
-このfilterは候補集合の絞り込み機能であって、FAMスプリッターや分類機ではない。また、共有索引をアクセス制御境界として採用できることも意味しない。
+このfilterは候補集合の絞り込み機能であって、Pool Occurrence Driverや分類機ではない。また、共有索引をアクセス制御境界として採用できることも意味しない。
 
 ### 2.2 HNSW、量子化、検索拡張
 
@@ -123,7 +129,7 @@ vector検索だけで最終品質を決めず、第一段の候補発見と第�
 - [BEIR](https://github.com/beir-cellar/beir)は異種domainの情報検索benchmarkとして一般性能の確認に使える。
 - [ranx](https://github.com/AmenRa/ranx)はPrecision、Recall、MRR、MAP、NDCG、統計検定、RRF等のrun比較・fusionに使える。
 
-MTEB／BEIRの公開scoreだけで採用を決めない。IBD／FAMで必要な日本語、記号`ψ`・`∇φ`・`λ`・`Q`、短文／長文、似た語彙で別分類の負例を含む人工qrelsを別に作る。ranx自身もclassifier評価用ではないため、FAMスプリッターの分類精度は今回の検索評価へ混ぜない。
+MTEB／BEIRの公開scoreだけで採用を決めない。IBD／FAMで必要な日本語、記号`ψ`・`∇φ`・`λ`・`Q`、短文／長文、似た語彙で別分類の負例を含む人工qrelsを別に作る。ranx自身もclassifier評価用ではないため、Pool Occurrence Driverの分類精度は今回の検索評価へ混ぜない。
 
 ## 7. model familyの調査候補
 
@@ -175,7 +181,7 @@ GenAI PluginとGDSをoptional trackとする。外部生成vectorの投入経路
 
 ## 10. 比較実験案
 
-1. 機密を含まない人工の日本語FAM風document、query、qrelsを作る。スプリッターは実装せず、評価用分類を手で固定する。
+1. 機密を含まない人工の日本語FAM風document、query、qrelsを作る。Pool Occurrence Driverは実装せず、評価用分類を手で固定する。
 2. 同一model・同一pipelineで生成したvectorをFaiss exact、Neo4j、hnswlib、USearchへ渡す。
 3. embedding差とANN差を分離して、`Recall@k`、`NDCG@k`、`MRR`を測る。
 4. Neo4jでは専用index、索引内filter、post-filterの件数・latency差を測る。
@@ -186,7 +192,7 @@ GenAI PluginとGDSをoptional trackとする。外部生成vectorの投入経路
 
 ## 11. 今回決めないこと
 
-- FAMスプリッターの配置、API、schema、分類model
+- Pool Occurrence Driverの配置、API、schema、分類model
 - IBDがembedding metadataの正本を所有するか
 - 本番Neo4j採用とCommunity／Enterprise／Auraの選択
 - embedding／reranking modelの採用
