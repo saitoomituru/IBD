@@ -136,6 +136,8 @@ class FamDocumentStoreTest(unittest.TestCase):
         self.assertEqual({node["fam_ref"] for node in graph["nodes"]}, {"fam:sample3-1", "fam:sample3-2"})
         self.assertEqual(len(graph["edges"]), 1)
         self.assertEqual(graph["cycle_refs"], [])
+        self.assertEqual(graph["resolution_mode"], "deterministic")
+        self.assertIsNone(graph["bottom_ref"])
 
     def test_module_graph_cycle_does_not_infinite_expand(self):
         store = STORAGE.FamDocumentStore(self.root)
@@ -160,6 +162,52 @@ class FamDocumentStoreTest(unittest.TestCase):
         fam_refs_in_nodes = [node["fam_ref"] for node in graph["nodes"]]
         self.assertEqual(fam_refs_in_nodes.count("fam:a"), 1)
         self.assertEqual(fam_refs_in_nodes.count("fam:b"), 1)
+        # 循環参照はvisited setで決定論的に停止するため、cycle_refsで
+        # 明示記録されてもresolution_modeはdeterministicのままである
+        # (「鳥卵パラドクス問題」のうち非終端を防ぐ経路と、パフォーマンス
+        # 上限を防ぐbounded-most-likely経路は別物)
+        self.assertEqual(graph["resolution_mode"], "deterministic")
+        self.assertIsNone(graph["bottom_ref"])
+
+    def test_module_graph_max_nodes_truncates_with_bounded_most_likely_and_bottom_ref(self):
+        store = STORAGE.FamDocumentStore(self.root)
+        store.put(
+            _document(
+                "fam:chain-1",
+                "rev-1",
+                fold_refs=[{"fam_ref": "fam:chain-2", "revision_policy": {"mode": "latest"}}],
+            )
+        )
+        store.put(
+            _document(
+                "fam:chain-2",
+                "rev-1",
+                fold_refs=[{"fam_ref": "fam:chain-3", "revision_policy": {"mode": "latest"}}],
+            )
+        )
+        store.put(_document("fam:chain-3", "rev-1"))
+
+        graph = store.resolve_module_graph(
+            "fam:chain-1", "rev-1", max_nodes=1, cycle_limit_oae_ref="oae://test/cycle-limit-approval"
+        )
+        self.assertEqual(graph["resolution_mode"], "bounded-most-likely")
+        # 「決定論的に解決できなかった」を偽らず返す: 到達可能な全nodeを
+        # silent successへ丸めず、打ち切り位置をbottom_refへ必ず付帯する
+        self.assertIsNotNone(graph["bottom_ref"])
+        self.assertEqual(graph["bottom_ref"]["fam_ref"], "fam:chain-2")
+        self.assertEqual(graph["bottom_ref"]["reason"], "max-nodes-reached")
+        self.assertEqual(graph["cycle_limit_oae_ref"], "oae://test/cycle-limit-approval")
+        self.assertEqual(len(graph["nodes"]), 1)
+
+    def test_module_graph_without_max_nodes_never_sets_cycle_limit_oae_ref(self):
+        # cycle_limit_oae_refを渡しても、実際に打ち切りが発生しなければ
+        # (bottom_refが無ければ)結果へ混入させない。承認を要求していない
+        # 操作にOAE参照を紛れ込ませない。
+        store = STORAGE.FamDocumentStore(self.root)
+        store.put(_document("fam:solo", "rev-1"))
+        graph = store.resolve_module_graph("fam:solo", "rev-1", cycle_limit_oae_ref="oae://test/unused")
+        self.assertEqual(graph["resolution_mode"], "deterministic")
+        self.assertIsNone(graph["cycle_limit_oae_ref"])
 
     def test_shared_child_referenced_from_multiple_parents(self):
         store = STORAGE.FamDocumentStore(self.root)

@@ -241,11 +241,30 @@ class FamDocumentStore:
         return {"status": "resolved", "fam_ref": fam_ref, "revision_ref": revision_ref, "document": document}
 
     def resolve_module_graph(
-        self, fam_ref: str, revision_ref: str, revision_policy_for_refs: dict[str, Any] | None = None
+        self,
+        fam_ref: str,
+        revision_ref: str,
+        revision_policy_for_refs: dict[str, Any] | None = None,
+        max_nodes: int | None = None,
+        cycle_limit_oae_ref: str | None = None,
     ) -> dict[str, Any]:
         """fam_ref経由のcross-FAM参照をinline copyせずmodule graphとして返す。
 
-        visited (fam_ref, revision_ref)を管理し、循環参照でも無限展開しない。
+        visited (fam_ref, revision_ref)を管理し、循環参照でも無限展開しない
+        (cycle_refsへ明示記録)。これは「鳥卵パラドクス問題」のうち
+        非終端(無限展開)を防ぐ経路であり、visited setで常に決定論的に
+        停止する。
+
+        `max_nodes`は、循環はしていないが到達可能nodeが多すぎて
+        dynamic relationship performance問題(鳥卵パラドクス問題の
+        もう一方、`docs/architecture/pool-occurrence-driver.ja.md`§7.3)
+        が起きる場合に、呼び出し側が明示的に打ち切りを要求するための
+        parameterである。IBD自身はこの上限値を推測・自動設定しない。
+        `max_nodes`到達で打ち切った場合は`resolution_mode:
+        "bounded-most-likely"`として返し、`bottom_ref`に打ち切り位置を
+        必ず付帯する(§7.4)。`cycle_limit_oae_ref`は、この打ち切り
+        policyを承認した呼び出し側のOAE参照をそのまま伝播するだけで、
+        IBD自身がOAEを発行するわけではない(§7.2)。
         """
 
         revision_policy_for_refs = revision_policy_for_refs or {"mode": "latest"}
@@ -253,11 +272,23 @@ class FamDocumentStore:
         nodes: list[dict[str, Any]] = []
         edges: list[dict[str, Any]] = []
         cycle_refs: list[dict[str, Any]] = []
+        bottom_ref: dict[str, Any] | None = None
 
         def walk(current_fam_ref: str, current_revision_ref: str) -> None:
+            nonlocal bottom_ref
+            if bottom_ref is not None:
+                return
             key = (current_fam_ref, current_revision_ref)
             if key in visited:
                 cycle_refs.append({"fam_ref": current_fam_ref, "revision_ref": current_revision_ref})
+                return
+            if max_nodes is not None and len(nodes) >= max_nodes:
+                bottom_ref = {
+                    "fam_ref": current_fam_ref,
+                    "revision_ref": current_revision_ref,
+                    "reason": "max-nodes-reached",
+                    "max_nodes": max_nodes,
+                }
                 return
             visited.add(key)
             document = self.get(current_fam_ref, current_revision_ref)
@@ -279,6 +310,8 @@ class FamDocumentStore:
                 }
             )
             for fold_ref in document.get("fold_refs", []):
+                if bottom_ref is not None:
+                    return
                 child_fam_ref = fold_ref["fam_ref"]
                 child_policy = fold_ref.get("revision_policy", revision_policy_for_refs)
                 resolved = self.resolve(child_fam_ref, child_policy)
@@ -301,6 +334,9 @@ class FamDocumentStore:
             "edges": edges,
             "inline_expansion": False,
             "cycle_refs": cycle_refs,
+            "resolution_mode": "bounded-most-likely" if bottom_ref is not None else "deterministic",
+            "bottom_ref": bottom_ref,
+            "cycle_limit_oae_ref": cycle_limit_oae_ref if bottom_ref is not None else None,
         }
 
     def append_ml_trace(
