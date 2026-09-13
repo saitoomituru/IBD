@@ -37,6 +37,8 @@ IBD文書内で単に「層」と書く場合、どの軸かを明示する。FA
 IBDは上位Foldから渡された`fold_nesting_depth`を、SDK surface番号、database階層、FAM再帰深度から
 推定せず保持する。
 
+**軸の混同禁止**: この`G`(Fold nesting — Fold containerを包むnesting depth)は、FQuery Issue #41やSphereOS Atlantis由来のFold7G研究草稿(ZeroRoomLab-manifest `note/20260819-2212__SphereDOS_Fold7G_Fold8G_registry_upgrade_memo.ja.md`、`G7 World`〜`G1 Reality/Substrate`という意味的スコープレジストリ)とは別軸である。前者はFold container参照の交差回数を数えるscalarで自動推定禁止、後者はWorld/Position/Causality等の階層ラベル(ordinal registry)。同じ記号Gを共有するが同一視・自動変換しない。
+
 `4D Fold`は四つのContext Dimensionを束ねるというarityであり、四つのDatabase、四次元vector、技術Layer 4を意味しない。同じ4DでもDimension IDとRegistry revisionが異なれば互換ではない。
 
 ## 3. IBDの論理・管理・物理単位
