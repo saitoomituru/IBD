@@ -51,6 +51,12 @@ SELECT  fact pointer evidence_bindings
 
 現状の実装カバレッジ(`composite_fam.py`): FIT+SELECTのみ実装、MATCH(vector近傍検索)は未実装のまま`local_retrieval_runs: []`で明示保持している。
 
+### 2.0a MATCH occurrenceのembedding計算はIBDが決定しない(2026-09-14追記、MAGI監査済み)
+
+MATCH occurrenceが必要とするembedding計算(text→vector)は、FAM `Q(scope).unFold.embed(text)`(不可逆・生成、`docs/specification/fam-q-declaration-execution.ja.md`§4)であり、その実行媒体(どのembeddingモデル・ベンダー・accelerator)の解決はFQuery Issue #39が定義する**Infinite Core**の`semantic.embedding.search`capability resolutionへ委譲する。IBD自身はembeddingベンダーを決定・固定しない——これはIBD既存の責務境界(実行主体の選定はIBDが持たない)とも一致する。
+
+vendor lock-in(選定後の退出コスト)は、unFoldの入力になるDeFold原本(`source_document`、本書§7.2以前から実装済みのlossless保持)が生存している限り、いつでも別のInfinite Core adapterで再embeddingできるため構造的に発生しない。したがって「どのembeddingベンダーを採用するか」は本書のMATCH occurrence実装を進める前提条件ではなく、Infinite Core側のcapability contract整備と並行して後から決めてよい。
+
 ### 2.1 FITの二つの粒度(2026-09-14追記)
 
 `composite_fam.py`のFIT(`∇φ.modules`/`assembly_graph`)は、複数の選択済みFAM branchをMapping FAMで束ねるassembly-level FITである。これとは別に、一つのFAM内部でΨノード同士が∇φでどう繋がっているかを表すintra-FAM level FITを`experiments/season0/pool_occurrence_fit.py`(`build_fit_occurrence_graph()`)として実装した。
@@ -205,6 +211,7 @@ occurrence_result:
 
 - 実装済み(2026-09-14): `resolve_module_graph()`(Fold-level cross-document graph)へ`max_nodes`/`resolution_mode`/`bottom_ref`/`cycle_limit_oae_ref`を実装した(`experiments/season0/storage_adapter.py`)。§7.4の契約は、まずFold-level graphの実装として最初に成立した。Pool Occurrence Driver SPI本体(`resolve_occurrence`、classification/routing)側への同契約の配線はまだ未実装
 - 実装済み(2026-09-14): FIT occurrence(intra-FAM level、Ψ↔Node/∇φ↔Relationship Type)の最初のmodelingを`experiments/season0/pool_occurrence_fit.py`として実装した(§2.1参照)。MATCH/SELECT occurrenceはまだ対象外
+- 未確定・要SphereOS-Atlantis側の正式判断(2026-09-14ブレスト、本書のみに記録): `PLI`(Prompt Line Interface、SphereOS-Atlantis `SPHERE-DOS.ja.md`で定義済み)を「Prompt Line Interpreter」というダブルミームとしても読む案が出た——unFold結果を再解釈してDeFold原本文脈へ差し戻す解釈系、という意味を重ねる構想。`SPHERE-DOS.ja.md`の正式定義はまだ未変更であり、本項はその判断が必要という記録のみに留める(Raphael監査: 未成熟な語義拡張をSphereOS-Atlantisの正本へ無断で書き込まない)
 - `resolve_occurrence`等、SPI関数シグネチャの最終名称(本書の対応表は暫定)
 - schema draft(`pool-occurrence-binding.schema.json`等)の実ファイル化
 - 実装コード(Python `experiments/season0/*.py`)側の識別子改名——現状のPython実装には`splitter`という識別子は存在せず(確認済み)、影響は文書層のみ。ただしFQuery側の`sub_splitters`フィールド名(decomposition schema内、DeFoldの分解tree構造を指す既存フィールド)との整合は別issueで扱う
