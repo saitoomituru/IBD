@@ -203,6 +203,8 @@ occurrence_result:
 
 ## 8. 未確定事項(Season 0)
 
+- 実装済み(2026-09-14): `resolve_module_graph()`(Fold-level cross-document graph)へ`max_nodes`/`resolution_mode`/`bottom_ref`/`cycle_limit_oae_ref`を実装した(`experiments/season0/storage_adapter.py`)。§7.4の契約は、まずFold-level graphの実装として最初に成立した。Pool Occurrence Driver SPI本体(`resolve_occurrence`、classification/routing)側への同契約の配線はまだ未実装
+- 実装済み(2026-09-14): FIT occurrence(intra-FAM level、Ψ↔Node/∇φ↔Relationship Type)の最初のmodelingを`experiments/season0/pool_occurrence_fit.py`として実装した(§2.1参照)。MATCH/SELECT occurrenceはまだ対象外
 - `resolve_occurrence`等、SPI関数シグネチャの最終名称(本書の対応表は暫定)
 - schema draft(`pool-occurrence-binding.schema.json`等)の実ファイル化
 - 実装コード(Python `experiments/season0/*.py`)側の識別子改名——現状のPython実装には`splitter`という識別子は存在せず(確認済み)、影響は文書層のみ。ただしFQuery側の`sub_splitters`フィールド名(decomposition schema内、DeFoldの分解tree構造を指す既存フィールド)との整合は別issueで扱う
