@@ -129,7 +129,7 @@ IBDが所有するもの:
 
 - RegistryとSchemaの忠実な保持
 - Store／Database／Storage BindingとMeta Catalogの解決
-- default／override FAM Splitter Bindingの決定
+- default／override Pool Occurrence Bindingの決定([Pool Occurrence Driver](pool-occurrence-driver.ja.md)、旧FAM Splitter)
 - Database isolation
 - ベクトル候補発見
 - graph compatibility検査
@@ -157,7 +157,7 @@ IBDが所有するもの:
 ## 9. 未確定事項
 
 - port型の記述形式
-- 標準FAM Splitter実装、custom SPI transport、fallback policyの確定
+- 標準Pool Occurrence Driver実装(旧FAM Splitter、詳細は[pool-occurrence-driver.ja.md](pool-occurrence-driver.ja.md))、custom SPI transport、fallback policyの確定
 - vector classifierとgraph storeの製品選定
 - 一つの論理IBD Databaseを物理的に隔離する粒度
 - cross-database edgeの永続化方式

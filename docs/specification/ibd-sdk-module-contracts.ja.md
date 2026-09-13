@@ -14,7 +14,7 @@ IBDを一つのmonolithへ固定せず、低水準contractからprompt／low-cod
 IBD Core Contracts
 ├─ Meta Catalog SPI
 ├─ Registry Provider SPI
-├─ FAM Splitter SPI
+├─ Pool Occurrence Driver SPI(旧FAM Splitter SPI)
 ├─ Graph Store SPI
 ├─ Vector Store SPI
 ├─ Evidence / RDB Connector SPI
@@ -52,7 +52,7 @@ ibd_envelope:
 ```text
 resolve_store(store_ref, revision_policy)
 resolve_database(database_ref, revision_policy)
-resolve_effective_splitter(database_ref)
+resolve_effective_pool_occurrence(database_ref)
 resolve_storage_bindings(database_ref, capability)
 record_receipt(operation_ref, receipt)
 ```
@@ -67,21 +67,23 @@ Classification Registry、Schema Bundle、Context Fold Profile、Access Map、Ca
 
 Registryは型と定規、Context Registerはbind済み実体である。既存の`Classification Registry`名称は保持し、runtime値をRegistryと呼ばない。
 
-## 5. FAM Splitter SPI
+## 5. Pool Occurrence Driver SPI(旧FAM Splitter SPI)
+
+RDB／Vector DB／Graph DB／file／object等の異種データソースをPoolとして抽象化し、FIT(構造一致)／MATCH(ベクトル近傍)／SELECT(fact pointer)の3 occurrenceで照合する。命名経緯とTO型循環参照正規化の詳細は[Pool Occurrence Driver](../architecture/pool-occurrence-driver.ja.md)を参照。
 
 ```text
-split(source_fam, registry_ref, fold_ref, routing_policy_ref)
+resolve_occurrence(source_fam, registry_ref, fold_ref, routing_policy_ref)
   -> candidate routes
      + classification evidence
      + unmapped branches
-     + splitter receipt
+     + occurrence receipt
 ```
 
 最低出力:
 
 ```yaml
-split_result:
-  splitter_ref: splitter://example@2
+occurrence_result:
+  occurrence_ref: pool-occurrence://example@2
   registry_ref: registry://example@4
   fold_ref: fold://example@4
   source_fam_ref: fam://source
@@ -107,7 +109,7 @@ Database override
   -> unresolved
 ```
 
-custom Splitter失敗時は`failed`を返す。明示されたfallback policyがある場合だけ次候補を呼び、最初の失敗receiptを消さない。
+custom Occurrence Driver失敗時は`failed`を返す。明示されたfallback policyがある場合だけ次候補を呼び、最初の失敗receiptを消さない。
 
 ## 6. Graph／Vector／Evidence Adapter
 
@@ -130,7 +132,7 @@ local_retrieval:
   local_rank: 3
 ```
 
-Vector Store SPIはFAM Splitterではない。Neo4jの索引内filterもaccess boundaryやContext classifierの代用品にしない。
+Vector Store SPIはPool Occurrence Driverではない。Neo4jの索引内filterもaccess boundaryやContext classifierの代用品にしない。
 
 ### 6.3 Evidence／RDB Connector SPI
 
@@ -210,10 +212,10 @@ moduleはnameだけでなくversion、capability、supported schema、error sema
 
 ```yaml
 module_capability:
-  module_ref: module://ibd/splitter@1
+  module_ref: module://ibd/pool-occurrence-driver@1
   sdk_surface: S1
   supported_contracts:
-    - ibd-splitter-spi@0.1-draft
+    - ibd-pool-occurrence-driver-spi@0.1-draft
   optional_capabilities:
     - multi-label
     - evidence-spans
@@ -236,7 +238,7 @@ AstroSDKやAtlantis SDKはIBDSDKの全moduleを必須同梱せず、目的に必
 
 - `ibd-store-manifest.schema.json`
 - `context-fold-profile.schema.json`
-- `splitter-binding.schema.json`
+- `pool-occurrence-binding.schema.json`(旧`splitter-binding.schema.json`)
 - `score-calibration-profile.schema.json`
 - `transformation-receipt.schema.json`
 
@@ -245,6 +247,7 @@ AstroSDKやAtlantis SDKはIBDSDKの全moduleを必須同梱せず、目的に必
 ## 13. 関連文書
 
 - [Context Dimension OSにおけるIBDとIBDSDK](../architecture/context-dimension-os-and-ibdsdk.ja.md)
+- [Pool Occurrence Driver(旧FAM Splitter)](../architecture/pool-occurrence-driver.ja.md)
 - [Classification Registry、Database隔離、Routing契約](classification-registry-and-routing.ja.md)
 - [Query FAMとComposite FAM契約](fam-query-and-composition.ja.md)
 - [Evidence鮮度とLast Order契約](evidence-freshness-and-last-order.ja.md)

@@ -15,8 +15,10 @@ Sphere共通契約
   Registry / Context Register / D Fold / Access Map / Transformer / OAE
                                ↓ bind
 IBD実装プロファイル
-  Store / Database / Storage Binding / Splitter / Resolver / SsC / Adapter
+  Store / Database / Storage Binding / Pool Occurrence Driver / Resolver / SsC / Adapter
 ```
+
+`Pool Occurrence Driver`は旧称「FAM Splitter」。命名経緯・FIT/MATCH/SELECT occurrenceとの対応は[Pool Occurrence Driver](pool-occurrence-driver.ja.md)を参照。
 
 霊的Presentation、神学、魔術、物理、Worldの定義は上位SDK／Registryに属する。IBDはそれらを第一級に保持できなければならないが、自前の正解へ制定しない。
 
@@ -50,14 +52,14 @@ IBD Storeは、一つの上位運用境界に属する複数IBD Databaseと、�
 ```text
 IBD Store
 ├─ Meta Catalog
-├─ default Splitter Binding
+├─ default Pool Occurrence Binding
 ├─ SDK / connector profiles
 ├─ Access Map / calibration refs
 └─ IBD Database[]
    ├─ Schema Bundle
    ├─ Classification Registry refs
    ├─ Context Fold Profile
-   ├─ effective Splitter Binding
+   ├─ effective Pool Occurrence Binding
    ├─ Graph / Vector Storage Bindings[]
    ├─ RDB / Evidence Connector Bindings[]
    └─ OAE / Provenance refs
@@ -90,7 +92,7 @@ Meta Catalogが管理する候補:
 
 - Store／Database manifestとrevision
 - Registry、Schema Bundle、Context Fold refs
-- default／override Splitter Binding
+- default／override Pool Occurrence Binding
 - graph／vector／RDB／Evidence connector metadata
 - embedding、metric、calibration profile
 - Access Map、Mapping FAM、Transformer capability refs
@@ -100,9 +102,9 @@ Meta Catalogが管理する候補:
 
 Embedded Libraryでは別のCatalog adapterを差し込める。adapter差でQuery FAMやComposite FAMの意味を変えない。
 
-## 5. FAM Splitter
+## 5. Pool Occurrence Driver(旧FAM Splitter)
 
-FAM SplitterはIBDSDK内の疎結合library／SPIとする。
+Pool Occurrence DriverはIBDSDK内の疎結合library／SPIとする。RDB／Vector DB／Graph DB／file／object等、異種データソースを抽象化したPoolに対し、FIT(構造一致)／MATCH(ベクトル近傍)／SELECT(fact pointer)という3つのoccurrenceで照合・ルーティングする。詳細な定義、命名経緯、TO型循環参照正規化は[Pool Occurrence Driver](pool-occurrence-driver.ja.md)を参照。
 
 ```text
 source FAM / FAMLog
@@ -114,11 +116,11 @@ source FAM / FAMLog
 route candidates / tags / evidence / unknown / receipt
 ```
 
-Storeは既定Splitter Bindingを一つ持てる。各IBD Databaseは必要な場合だけ一つのBindingでoverrideする。未指定DatabaseはStore既定値を継承する。
+Storeは既定Pool Occurrence Bindingを一つ持てる。各IBD Databaseは必要な場合だけ一つのBindingでoverrideする。未指定DatabaseはStore既定値を継承する。
 
-ZeroRoomLab標準Splitterを既定同梱できるが、第三者は互換SPIへ独自Splitterを差し込める。custom Splitterが失敗した場合、上位Policyが許可しない限り標準Splitterへsilent fallbackしない。
+ZeroRoomLab標準Pool Occurrence Driverを既定同梱できるが、第三者は互換SPIへ独自Driverを差し込める。custom Occurrence Driverが失敗した場合、上位Policyが許可しない限り標準Driverへsilent fallbackしない。
 
-Splitterは候補分類と根拠を返す。Registryが許可classと保存先を定義し、IBD adapterが決定済みrouteへ書き込む。Splitter自身が未知のDatabaseを作らない。
+Pool Occurrence Driverは候補分類と根拠を返す。Registryが許可classと保存先を定義し、IBD adapterが決定済みrouteへ書き込む。Driver自身が未知のDatabaseを作らない。
 
 ## 6. D Fold bundleと技術依存
 
@@ -185,7 +187,7 @@ Native Service
 Containerized Service
 ```
 
-三形態はtransportと運用特性が違うが、同じStore／Database／Splitter／OAE参照／Provenance契約を維持する。Dockerだけを正本にせず、Nativeだけを標準にせず、App内libraryだけを特権化しない。
+三形態はtransportと運用特性が違うが、同じStore／Database／Pool Occurrence Driver／OAE参照／Provenance契約を維持する。Dockerだけを正本にせず、Nativeだけを標準にせず、App内libraryだけを特権化しない。
 
 ## 10. 不変条件
 
@@ -197,7 +199,7 @@ Containerized Service
 6. D数またはGの深さだけでFold互換性を決めない。
 7. Databaseの指定なしに横断vector検索しない。
 8. 異storeのraw scoreを直接sortしない。
-9. custom Splitterの失敗を無断fallbackで隠さない。
+9. custom Pool Occurrence Driverの失敗を無断fallbackで隠さない。
 10. Run TraceをOAEへ自動昇格しない。
 11. Context権限からOS／Database credentialを推定昇格しない。
 
@@ -205,7 +207,7 @@ Containerized Service
 
 - Meta Catalogの本番adapterとHA構成
 - Store／Databaseの物理隔離粒度
-- FAM Splitter標準実装とplugin transport
+- Pool Occurrence Driver標準実装とplugin transport(旧FAM Splitter、詳細は[pool-occurrence-driver.ja.md](pool-occurrence-driver.ja.md))
 - SsCの校正関数、SIN定義、逆射影可能条件
 - 共通OAE schema確定後のIBD binding version
 - Graph／Vector／RDB connectorの正式採用
@@ -213,6 +215,7 @@ Containerized Service
 ## 12. 関連文書
 
 - [FAMネイティブIBDアーキテクチャ](fam-native-ibd.ja.md)
+- [Pool Occurrence Driver(旧FAM Splitter)](pool-occurrence-driver.ja.md)
 - [IBDSDK module契約](../specification/ibd-sdk-module-contracts.ja.md)
 - [Classification Registry、Database隔離、Routing契約](../specification/classification-registry-and-routing.ja.md)
 - [Neo4j Vector／Embedding周辺ライブラリー調査](../research/neo4j-vector-and-embedding-survey-20260718.ja.md)
