@@ -85,15 +85,15 @@ Core意味論が固定された後に比較する。
 
 MariaDB＋Neo4jは候補であり、Season 0開始時のCore前提にはしない。
 
-## 7. Experiment E: Store、Meta Catalog、Splitter SPI
+## 7. Experiment E: Store、Meta Catalog、Pool Occurrence Driver SPI(旧Splitter SPI)
 
 人工の一つのIBD Storeへ三つのIBD Databaseを登録し、次を検査する。
 
-1. 未指定DatabaseがStore既定Splitterを継承する
+1. 未指定DatabaseがStore既定Pool Occurrence Driverを継承する
 2. Database overrideが既定Bindingより優先される
-3. custom Splitter失敗時にsilent fallbackしない
+3. custom Occurrence Driver失敗時にsilent fallbackしない
 4. 明示fallback時も最初の失敗receiptを保持する
-5. SplitterがRegistry外のDatabaseへrouteできない
+5. Pool Occurrence DriverがRegistry外のDatabaseへrouteできない
 6. Meta Catalogがcredential本文ではなく`secret_ref`だけを保持する
 
 ## 8. Experiment F: D Fold、Access Map、OAE
@@ -131,7 +131,7 @@ MariaDB＋Neo4jは候補であり、Season 0開始時のCore前提にはしな�
 - World／神学／哲学／経験観測の存在確定が外部定規で降格・普遍化されない
 - IBDメタ時計とsource／domain／schedule／logical timelineが混ざらない
 - 三実行形態の共通契約が記述される
-- Store／Database／Storage BindingとSplitter Bindingの契約が記述される
+- Store／Database／Storage BindingとPool Occurrence Bindingの契約が記述される
 - D Fold、Access Map、Run Trace、OAE参照を混同しないnegative test計画がある
 - SsCの未校正・不可逆・sector曖昧性を成功へ偽装しない
 - 未検証性能をREADMEで実装済みと主張しない

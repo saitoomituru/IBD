@@ -105,14 +105,14 @@ IBD Database
 ```text
 IBD Store
 ├─ Meta Catalog
-├─ default Splitter Binding
+├─ default Pool Occurrence Binding
 └─ IBD Database[]
    ├─ Schema Bundle / Registry / Context Fold
    ├─ Graph / Vector Storage Bindings[]
    └─ RDB / Evidence Connector Bindings[]
 ```
 
-MariaDBはMeta Catalogの標準adapter候補、Neo4jはgraph／vector binding候補です。どちらもIBD Coreの意味論ではありません。DatabaseごとにFAM Splitterをoverrideでき、未指定時はStore既定Splitterを使います。custom Splitterの失敗時は、上位Policyの指定なしに別Splitterへ黙ってfallbackしません。
+MariaDBはMeta Catalogの標準adapter候補、Neo4jはgraph／vector binding候補です。どちらもIBD Coreの意味論ではありません。DatabaseごとにPool Occurrence Driver(旧FAM Splitter、詳細は[docs/architecture/pool-occurrence-driver.ja.md](docs/architecture/pool-occurrence-driver.ja.md))をoverrideでき、未指定時はStore既定Driverを使います。custom Occurrence Driverの失敗時は、上位Policyの指定なしに別Driverへ黙ってfallbackしません。
 
 ## 5. バインダーとしての中立性
 
@@ -300,7 +300,7 @@ IBDが行わないこと:
 
 ## 13. 現在地
 
-このリポジトリは仕様策定Season 0です。現時点の成果は責務、語彙、不変条件、draft Schema、人工fixture、依存なしreference harness、IBDSDK module境界と、Neo4j 2026.06を対象としたvector／embedding周辺の第三者製品調査です。FAM Splitter SPI、Meta Catalog adapter、SsC、OAE binding、本番実装、実Neo4j接続、性能、対応DB、ライセンス適合性、Raspberry Pi適合性は未実装または未検証です。
+このリポジトリは仕様策定Season 0です。現時点の成果は責務、語彙、不変条件、draft Schema、人工fixture、依存なしreference harness、IBDSDK module境界と、Neo4j 2026.06を対象としたvector／embedding周辺の第三者製品調査です。Pool Occurrence Driver SPI(旧FAM Splitter SPI)、Meta Catalog adapter、SsC、OAE binding、本番実装、実Neo4j接続、性能、対応DB、ライセンス適合性、Raspberry Pi適合性は未実装または未検証です。FIT occurrence(Ψ↔Node/∇φ↔Relationship Type)のmodelingとresolve_module_graphのresolution_mode/bottom_ref契約は実データで検証済みですが、MATCH occurrence(embedding)は製品選定待ちのため未実装です。
 
 ```bash
 python3 experiments/season0/reference_harness.py
