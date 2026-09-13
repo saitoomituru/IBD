@@ -21,6 +21,12 @@ def _document(fam_ref, revision_ref):
     }
 
 
+def _document_with_source(fam_ref, revision_ref):
+    document = _document(fam_ref, revision_ref)
+    document["source_document"] = {"fam_id": fam_ref, "revision_id": revision_ref, "kind": "decomposition"}
+    return document
+
+
 class FquerCliTest(unittest.TestCase):
     def setUp(self):
         self.tempdir = tempfile.TemporaryDirectory()
@@ -74,6 +80,78 @@ class FquerCliTest(unittest.TestCase):
         response = json.loads(completed.stdout)
         self.assertEqual(response["status"], "ok")
         self.assertEqual(response["result"]["status"], "unknown")
+
+    def test_put_oae_then_resolve_with_oae_round_trip_via_real_subprocess(self):
+        put_completed = self._run({
+            "operation": "put",
+            "root": self.root,
+            "document": _document_with_source("fam:fquery-cli-oae-1", "rev-1"),
+        })
+        self.assertEqual(put_completed.returncode, 0, put_completed.stderr)
+
+        put_oae_completed = self._run({
+            "operation": "put_oae",
+            "root": self.root,
+            "subject_ref": "fam:fquery-cli-oae-1@rev-1",
+            "oae_ref": "oae:fquery-cli-oae-1",
+            "envelope": {"observer_ref": "observer://test", "observerVerdict": "nontrivial"},
+        })
+        self.assertEqual(put_oae_completed.returncode, 0, put_oae_completed.stderr)
+        put_oae_response = json.loads(put_oae_completed.stdout)
+        self.assertEqual(put_oae_response["status"], "ok")
+        self.assertEqual(put_oae_response["record"]["oae_ref"], "oae:fquery-cli-oae-1")
+
+        resolve_with_oae_completed = self._run({
+            "operation": "resolve_with_oae",
+            "root": self.root,
+            "fam_ref": "fam:fquery-cli-oae-1",
+            "revision_policy": {"mode": "latest"},
+        })
+        self.assertEqual(resolve_with_oae_completed.returncode, 0, resolve_with_oae_completed.stderr)
+        response = json.loads(resolve_with_oae_completed.stdout)
+        self.assertEqual(response["status"], "ok")
+        result = response["result"]
+        self.assertEqual(result["status"], "resolved")
+        # backend固有schema(l_topology/fold_refs/q_refs)がFQuery側へ逆流しない
+        self.assertNotIn("l_topology", result["fam"])
+        self.assertEqual(result["fam"]["fam_id"], "fam:fquery-cli-oae-1")
+        self.assertEqual(len(result["oae_records"]), 1)
+        self.assertEqual(result["oae_records"][0]["envelope"]["observer_ref"], "observer://test")
+
+    def test_resolve_with_oae_on_document_without_source_document_fails_honestly(self):
+        # source_documentを持たないdocument(旧形式のraw document)をprojection
+        # しようとすると、FQuery側を偽装したprojectionを返さずcontract-error
+        # として明示的に失敗する。silent successへ丸めない。
+        put_completed = self._run({
+            "operation": "put",
+            "root": self.root,
+            "document": _document("fam:fquery-cli-no-source", "rev-1"),
+        })
+        self.assertEqual(put_completed.returncode, 0, put_completed.stderr)
+
+        completed = self._run({
+            "operation": "resolve_with_oae",
+            "root": self.root,
+            "fam_ref": "fam:fquery-cli-no-source",
+            "revision_policy": {"mode": "latest"},
+        })
+        self.assertEqual(completed.returncode, 1)
+        response = json.loads(completed.stdout)
+        self.assertEqual(response["status"], "error")
+        self.assertIn("contract-error", response["reason"])
+
+    def test_resolve_with_oae_unknown_fam_ref_returns_structured_last_order(self):
+        completed = self._run({
+            "operation": "resolve_with_oae",
+            "root": self.root,
+            "fam_ref": "fam:does-not-exist",
+            "revision_policy": {"mode": "latest"},
+        })
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        response = json.loads(completed.stdout)
+        self.assertEqual(response["status"], "ok")
+        self.assertEqual(response["result"]["status"], "unknown")
+        self.assertIsNotNone(response["result"]["last_order"])
 
     def test_invalid_json_request_exits_nonzero_with_structured_error(self):
         completed = subprocess.run(

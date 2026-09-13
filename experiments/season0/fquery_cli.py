@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """FQueryプラグイン(plugins/ibd)から呼び出す最小JSON-over-stdio CLI。
 
-stdinから1つのJSON requestを読み、FamDocumentStoreのput/resolveを実行し、
-stdoutへ1つのJSON responseを書く。本番Resolverではなくreference実装への
-最小bridgeであり、Neo4j/SQLite/PostgreSQL等の本番backend選定
-(IBD #3/#4のUser Gate)を代替しない。evidence/oae/module-graphはまだ
-接続していない(put/resolveのみ)。
+stdinから1つのJSON requestを読み、FamDocumentStoreのput/resolve/OAE
+put/reloadを実行し、stdoutへ1つのJSON responseを書く。本番Resolverでは
+なくreference実装への最小bridgeであり、Neo4j/SQLite/PostgreSQL等の
+本番backend選定(IBD #3/#4のUser Gate)を代替しない。evidence/
+module-graphはまだ接続していない(put/resolve/put_oae/resolve_with_oae
+のみ)。
 """
 
 from __future__ import annotations
@@ -16,12 +17,19 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_STORAGE_ADAPTER_PATH = Path(__file__).resolve().parent / "storage_adapter.py"
-_SPEC = importlib.util.spec_from_file_location("season0_storage_adapter", _STORAGE_ADAPTER_PATH)
-assert _SPEC is not None and _SPEC.loader is not None
-_STORAGE = importlib.util.module_from_spec(_SPEC)
-sys.modules[_SPEC.name] = _STORAGE
-_SPEC.loader.exec_module(_STORAGE)
+
+def _load_sibling_module(name: str, filename: str):
+    path = Path(__file__).resolve().parent / filename
+    spec = importlib.util.spec_from_file_location(name, path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+_STORAGE = _load_sibling_module("season0_storage_adapter", "storage_adapter.py")
+_ADAPTER = _load_sibling_module("season0_fquery_fam_adapter", "fquery_fam_adapter.py")
 
 
 def _handle(request: dict[str, Any]) -> dict[str, Any]:
@@ -46,6 +54,23 @@ def _handle(request: dict[str, Any]) -> dict[str, Any]:
         result = store.resolve(fam_ref, revision_policy)
         return {"status": "ok", "operation": "resolve", "result": result}
 
+    if operation == "put_oae":
+        subject_ref = request.get("subject_ref")
+        oae_ref = request.get("oae_ref")
+        envelope = request.get("envelope")
+        if not subject_ref or not oae_ref or envelope is None:
+            return {"status": "error", "reason": "subject_ref-and-oae_ref-and-envelope-required"}
+        recorded = store.record_oae(subject_ref, oae_ref, envelope)
+        return {"status": "ok", "operation": "put_oae", "record": recorded}
+
+    if operation == "resolve_with_oae":
+        fam_ref = request.get("fam_ref")
+        revision_policy = request.get("revision_policy")
+        if not fam_ref or not revision_policy:
+            return {"status": "error", "reason": "fam_ref-and-revision_policy-required"}
+        result = _ADAPTER.reload_fquery_fam_with_oae(store, fam_ref, revision_policy)
+        return {"status": "ok", "operation": "resolve_with_oae", "result": result}
+
     return {"status": "error", "reason": f"unknown-operation:{operation}"}
 
 
@@ -59,7 +84,7 @@ def main() -> int:
 
     try:
         response = _handle(request)
-    except _STORAGE.ContractError as error:
+    except (_STORAGE.ContractError, _ADAPTER.ContractError) as error:
         print(json.dumps({"status": "error", "reason": f"contract-error:{error}"}, ensure_ascii=False))
         return 1
     except Exception as error:  # noqa: BLE001 -- CLI境界でraw tracebackをstdout契約へ漏らさない
