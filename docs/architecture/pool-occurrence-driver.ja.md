@@ -97,7 +97,86 @@ FileMaker TOのrelationship graphエディタの発想を継承し、GUI表現�
 
 責務の実体(候補分類と根拠を返す。Registryが許可classと保存先を定義する。IBD adapterが決定済みrouteへ書き込む。Splitter/Driver自身が未知のDatabaseを作らない)は変更しない。変更するのは名称と、(1)DeFold的分解工程を含意しない、という境界の明確化のみ。
 
-## 7. 未確定事項(Season 0)
+## 7. 決定論境界とOAE発行責務(2026-09-13ブレスト、SsC/鳥卵パラドクス問題)
+
+### 7.1 決定論closureというリトマス試験
+
+IBD/Pool Occurrence Driverが行うあらゆる計算に適用できる一般原則。
+
+```text
+入力 → 出力が一意に決定論的に閉じる
+  → OAE不要、そのまま出力してよい(IBD Coreの責務)
+  例: embedding vector計算、raw score、metric、calibration profileの機械的適用
+
+入力 → 出力が決定論で閉じない(重み・policy・選択・解釈が介在する)
+  → OAEとして管理しなければならない(IBD Coreの責務外)
+  例: fusion policyによる重み統合、calibrated SINの評価・閾値判断
+```
+
+`fam-native-ibd.ja.md`§8不変条件4「最終評価をIBD Coreへ混入させない」を、検証可能な基準へ落とし込んだもの。
+
+### 7.2 OAE発行はFQuery(上位system)の責務、IBDは証跡のみ
+
+IBD自身はOAEを発行しない。`fam-native-ibd.ja.md`§7が既に「IBDが所有するもの」に挙げているのは`OAE参照`であって`OAE発行`ではない——本節はこの既存区分を明文化するのみで、新しい制約を追加するものではない。
+
+```text
+IBD(決定論仕事)
+  Pool Occurrenceとadapterに指定された実行結果を
+  証跡(receipt: どのoccurrence、どのadapter、どの入出力、どの結果)として記録する
+
+FQuery / 上位system(解釈・判断)
+  IBDの証跡を受け取り、OAEを発行する
+  (Observer/Recorder/Interpreter/Initiator/Executor/Transformer/
+   Causal Contributorのrole付与、SIN評価、weight統合の承認等)
+
+上位system(さらに外側)
+  IAM(identity/access management)、authority policy
+  IBDはcredential本文を持たず`secret_ref`+authority scopeのみ保持する
+  (`context-dimension-os-and-ibdsdk.ja.md`§4と同じ境界)
+```
+
+SsC(§8、`ibd-sdk-module-contracts.ja.md`)への適用: calibration profileの機械的適用(local raw score ↔ meta SIN変換の実行)はIBD側receiptとして保持できるが、calibrated SINを「一致」「閾値超過」等として評価する行為はFQuery側が行い、その行為自体をFQuery側がOAEとして発行する。
+
+weight統合(Composite Resolverのfusion policy)への適用: 重み付け統合は決定論で閉じないため、どのrefFAMのどのQがこの統合を認可したかをFQuery側がOAEとして発行する。IBDはfusion policyの実行結果(fusion rank)をreceiptとして保持するのみで、そのpolicyの正当性は判断しない。
+
+### 7.3 鳥卵パラドクス問題
+
+Pool Occurrence graphのrelationship解決が循環参照で爆発する問題。FileMakerのrelationship graphがtopology errorを返す構造と同型。
+
+```text
+保存(write)時
+  循環・爆発しうるtopologyそのものを保存することはNGではない
+
+取り出し(retrieval/traversal)時
+  cycle limit n(何階層まで循環探索するか)は
+  Pool Occurrence Driver SPIへの正当な入力parameterとして持てる
+
+  ただしn自体の設定は決定論で閉じない policy選択のため、
+  FQuery側がOAEとしてこの選択を発行する
+
+  n到達までに決定論的に解決できなかった場合、IBDは
+  「決定論的に解決できなかった」を偽らず返す
+  (truncateして成功したふりをしない)
+```
+
+n到達によるdynamic relationship performance問題(循環参照過多による低速化)自体はIBD Core契約の対象外とし、Pool Occurrence graphを設計する側(Registry/Store定義者)の設計品質問題として明示的にNon-goalへ置く(FileMaker開発者のrelationship graph設計責任と同型)。
+
+### 7.4 resolution_modeとbottom_ref契約
+
+`occurrence_result`(旧`split_result`)の`status`に加え、次を持つ。
+
+```yaml
+occurrence_result:
+  # ...(既存fields)
+  resolution_mode: deterministic  # | bounded-most-likely
+  bottom_ref: null                # resolution_mode: bounded-most-likelyのとき必須
+  cycle_limit_oae_ref: null       # cycle limit nを承認したFQuery側OAE参照
+```
+
+`deterministic`: 完全に決定論的に解決済み。`⊥`なし。
+`bounded-most-likely`: cycle limit n到達により打ち切り、最尤(best-effort)で出力。探索限界のbottom(⊥/Last Order、FQuery `Bottomed<T>`union型と同型)を`bottom_ref`として必ず付帯する。これを欠くとLast Orderの⊥がどこで発生したか追跡不能になる。
+
+## 8. 未確定事項(Season 0)
 
 - `resolve_occurrence`等、SPI関数シグネチャの最終名称(本書の対応表は暫定)
 - schema draft(`pool-occurrence-binding.schema.json`等)の実ファイル化
@@ -105,7 +184,7 @@ FileMaker TOのrelationship graphエディタの発想を継承し、GUI表現�
 - Pool Occurrence Driver GUI(React Flow流用)の実装着手はM-F(GUIリファクタ)まで行わない(#44 Roadmap Gate準拠)
 - Pool Occurrence Driverの永続化フォーマット(2026-09-13ブレスト追記、2回目の指摘で精緻化): occurrence定義・relationship・bindingは`ψ/∇φ/λ`というFAM JSONのcontent軸ではなく、純粋にL軸(決定論的・構造的topology)とS軸(SDK surface抽象度)に属する資源であり、FAM JSONへ無理に押し込まない。またYAMLはPool間のrelationship(多対多のgraph構造、TOのjoin条件に相当するもの)の表現力が弱いという指摘があり、YAML一本化も前提にしない。候補として、FileMaker BaseElements的なXML(FileMakerのschema/relationship/layout/scriptをXML export・解析できる既存の商用互換資産)、またはFileMaker Data API連携時のXML(FMPXMLRESULT等)と親和性のある構造化XML+schemaを、relationship graph表現の候補とする。これによりFileMaker系ツールチェーンやXMLを読める他DB/cloud基盤からも同じrelationship定義をcommodity資産として読み込める可能性がある。ただしIBD Core実装は`experiments/season0/*.py`のPython中心であり、現状`schemas/draft/*.schema.json`はJSON Schemaで統一済み。XML系形式を採用する場合、(a)どの層(Meta Catalog manifest / occurrence binding / relationship graph)に適用するか、(b)既存JSON Schema系資産との共存方法、(c)Python実装側のXMLパース経路、を切り分けて検討する必要がある。次にこの話題へ戻るときのため、判断材料として記録するのみで今回は確定しない
 
-## 8. 関連文書
+## 9. 関連文書
 
 - [FAMネイティブIBDアーキテクチャ](fam-native-ibd.ja.md)
 - [Context Dimension OSにおけるIBDとIBDSDK](context-dimension-os-and-ibdsdk.ja.md)

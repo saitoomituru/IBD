@@ -97,9 +97,12 @@ occurrence_result:
   unmapped: []
   evidence_refs: []
   status: completed
+  resolution_mode: deterministic  # | bounded-most-likely
+  bottom_ref: null                # bounded-most-likelyのとき必須(鳥卵パラドクス問題、§7.3参照)
+  cycle_limit_oae_ref: null       # cycle limit nを承認したFQuery側OAE参照
 ```
 
-`classifier_score`、retrieval score、SsC SIN、fusion rankを同じ`score`へ畳まない。
+`classifier_score`、retrieval score、SsC SIN、fusion rankを同じ`score`へ畳まない。`resolution_mode`/`bottom_ref`/`cycle_limit_oae_ref`の契約詳細は[Pool Occurrence Driver §7](../architecture/pool-occurrence-driver.ja.md#7-決定論境界とoae発行責務2026-09-13ブレストssc鳥卵パラドクス問題)を参照。
 
 Binding優先順序:
 
@@ -173,6 +176,10 @@ target meta SIN range + calibration profile
 
 Query vector自体は別embedding空間へ翻訳しない。Query FAMのtext／構造を各storeのembedding engineへ渡し、そのstore内で検索する。
 
+### 8.1a 決定論境界(2026-09-13追記)
+
+calibration profileの機械的適用(local raw score → calibrated meta SINの変換実行)はIBD側でreceiptとして保持できる決定論仕事である。一方、calibrated meta SINを「一致」「閾値超過」等として評価する行為は決定論で閉じないため、IBD Coreの責務ではなくFQuery(上位system)が行い、その評価行為自体をFQuery側がOAEとして発行する。詳細は[Pool Occurrence Driver §7](../architecture/pool-occurrence-driver.ja.md#7-決定論境界とoae発行責務2026-09-13ブレストssc鳥卵パラドクス問題)を参照。
+
 ### 8.2 必須metadata
 
 - raw scoreとlocal rank
@@ -193,6 +200,8 @@ Query vector自体は別embedding空間へ翻訳しない。Query FAMのtext／�
 したがってSeason 0では、`meta SIN`の名称とinterfaceを研究対象として保持し、特定の三角関数を規格として確定しない。
 
 ## 9. OAE Storage Binding
+
+IBDはOAEを発行しない。IBDの責務はPool Occurrence Driverとadapterに指定された実行結果を証跡(receipt)として記録することであり、その証跡を解釈してOAEを発行するのはFQuery(上位system)である。IAM(identity/access management)、authority policyも同様に上位system責務であり、IBDはcredential本文を持たず`secret_ref`+authority scopeのみ保持する(§3参照)。
 
 OAEの共通意味schemaはManifest側の正本確定後にversionする。IBD側は先に次を保持する。
 
