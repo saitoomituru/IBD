@@ -119,6 +119,54 @@ def persist_fquery_nonlinear_observations(store: Any, replay_fixture: dict[str, 
     return recorded
 
 
+def ibd_storage_document_to_fquery_projection(document: dict[str, Any]) -> dict[str, Any]:
+    """IBD storage documentから、backend固有schema(l_topology/fold_refs/q_refs等)を
+    FQuery Coreへ逆流させずFAM projectionを再構成する(#44 Phase D「FQuery reload/
+    projection」段)。
+
+    lossless保持された`source_document`を正としてそのまま返す。IBD adapter
+    (file-backed参照実装 -> 将来の本番backend)を差し替えてもFQuery Core側の
+    FAM意味論は変化しない、という#44復帰条件をこの一点で満たす。
+    """
+
+    if "source_document" not in document:
+        raise ContractError("documentにsource_documentが無く、FQuery FAMへ再構成できません")
+    return copy.deepcopy(document["source_document"])
+
+
+def reload_fquery_fam_with_oae(
+    store: Any, fam_ref: str, revision_policy: dict[str, Any]
+) -> dict[str, Any]:
+    """#44 Phase D round-tripの`FQuery reload/projection`段を成立させる。
+
+    `store.resolve()`のstatus(resolved/unknown)をsilent successへ変換せず
+    そのまま伝播する。resolved時のみFQuery FAM projectionとOAE recordsを
+    返すが、両者を同一objectへ混ぜず別fieldとして並置する(FAMとOAEの
+    意味論を混同しない)。同一subjectの相反するOAEも`list_oae_for_subject`
+    がそのまま全件返すため、ここで上書き・集約しない。
+    """
+
+    resolved = store.resolve(fam_ref, revision_policy)
+    if resolved["status"] != "resolved":
+        return {
+            "status": resolved["status"],
+            "fam_ref": fam_ref,
+            "last_order": resolved.get("last_order"),
+        }
+
+    revision_ref = resolved["revision_ref"]
+    fam = ibd_storage_document_to_fquery_projection(resolved["document"])
+    subject_ref = f"{fam_ref}@{revision_ref}"
+    oae_records = store.list_oae_for_subject(subject_ref)
+    return {
+        "status": "resolved",
+        "fam_ref": fam_ref,
+        "revision_ref": revision_ref,
+        "fam": fam,
+        "oae_records": oae_records,
+    }
+
+
 def _find_ref_values(value: Any, keys: tuple[str, ...]) -> list[str]:
     found: list[str] = []
 

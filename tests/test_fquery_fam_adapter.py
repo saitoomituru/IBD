@@ -113,6 +113,44 @@ class FQueryFamAdapterRoundTripTest(unittest.TestCase):
         with self.assertRaises(STORAGE.ContractError):
             ADAPTER.persist_fquery_nonlinear_observations(self.store, replay_fixture)
 
+    def test_reload_projects_fam_losslessly_and_attaches_oae_without_backend_schema_leak(self):
+        # #44 Phase D「FQuery canonical FAM -> IBD driver write -> read/query ->
+        # OAE candidate evaluation -> verdict/receipt persistence -> FQuery
+        # reload/projection」のうち、最後のreload/projection段を実データで検証する。
+        with (FIXTURES / "nonlinear-observer-comparison.json").open("r", encoding="utf-8") as stream:
+            replay_fixture = json.load(stream)
+
+        self.store.put(ADAPTER.fquery_decomposition_fam_to_storage_document(self.candidate_a))
+        self.store.put(ADAPTER.fquery_decomposition_fam_to_storage_document(self.candidate_b))
+        ADAPTER.persist_fquery_nonlinear_observations(self.store, replay_fixture)
+
+        reloaded = ADAPTER.reload_fquery_fam_with_oae(
+            self.store,
+            self.candidate_a["fam_id"],
+            {"mode": "pinned", "revision_ref": self.candidate_a["revision_id"]},
+        )
+        self.assertEqual(reloaded["status"], "resolved")
+        # backend固有schema(l_topology/fold_refs/q_refs/source_document)が
+        # FQuery側へ逆流しない: 返るfamは元のFQuery FAMとbyte-for-byte同一
+        self.assertEqual(reloaded["fam"], self.candidate_a)
+        self.assertNotIn("l_topology", reloaded["fam"])
+        self.assertNotIn("source_document", reloaded["fam"])
+        self.assertEqual(len(reloaded["oae_records"]), 1)
+        self.assertEqual(
+            reloaded["oae_records"][0]["envelope"]["observerRef"],
+            "observer://anthropic/claude-code/current-session",
+        )
+
+    def test_reload_unresolved_fam_returns_unknown_not_silent_success(self):
+        reloaded = ADAPTER.reload_fquery_fam_with_oae(self.store, "fam:does-not-exist", {"mode": "latest"})
+        self.assertEqual(reloaded["status"], "unknown")
+        self.assertNotIn("fam", reloaded)
+        self.assertIsNotNone(reloaded["last_order"])
+
+    def test_projection_rejects_document_without_source_document(self):
+        with self.assertRaises(ADAPTER.ContractError):
+            ADAPTER.ibd_storage_document_to_fquery_projection({"fam_ref": "x", "revision_ref": "1"})
+
     def test_rejects_non_decomposition_kind(self):
         with self.assertRaises(ADAPTER.ContractError):
             ADAPTER.fquery_decomposition_fam_to_storage_document({"kind": "access-map", "fam_id": "x", "revision_id": "1", "λ": {}})
