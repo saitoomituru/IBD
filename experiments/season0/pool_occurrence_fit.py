@@ -18,6 +18,14 @@ decomposition FAM。FQuery出力を実際に扱う際は`fquery_fam_adapter.py`�
 `resolve_module_graph`は複数documentを結ぶFold-level graph、本module
 `build_fit_occurrence_graph()`は一つのdocument内部のΨノード同士を結ぶ
 intra-FAM graphであり、両者を混同しない。
+
+同じ「FIT」という語を使う`composite_fam.py`の実装(`∇φ.modules`/
+`assembly_graph`、複数の選択済みFAM branchを明示Mapping FAMで束ねる
+assembly-level FIT)とも別の層である。composite_fam.pyのFITは
+「Composite FAM合成時にどのbranchを束ねるか」、本moduleのFITは
+「一つのFAM内部のΨノードが∇φで互いにどう繋がっているか」を表し、
+どちらも同じPool Occurrence Driver抽象(FIT/MATCH/SELECT)の具体化
+だが、扱う粒度が異なる。統合の要否は別途判断する。
 """
 
 from __future__ import annotations

@@ -51,6 +51,19 @@ SELECT  fact pointer evidence_bindings
 
 現状の実装カバレッジ(`composite_fam.py`): FIT+SELECTのみ実装、MATCH(vector近傍検索)は未実装のまま`local_retrieval_runs: []`で明示保持している。
 
+### 2.1 FITの二つの粒度(2026-09-14追記)
+
+`composite_fam.py`のFIT(`∇φ.modules`/`assembly_graph`)は、複数の選択済みFAM branchをMapping FAMで束ねるassembly-level FITである。これとは別に、一つのFAM内部でΨノード同士が∇φでどう繋がっているかを表すintra-FAM level FITを`experiments/season0/pool_occurrence_fit.py`(`build_fit_occurrence_graph()`)として実装した。
+
+```text
+FAM Ψ  ↔ Graph Node
+FAM ∇φ ↔ Graph Relationship Type(∇φ.gradient_type)
+```
+
+実candidate(candidate-a/candidate-b、Issue #42 live run由来)で検証済み。`Q.copy_role`(`translation-witness`)+`Q.source_node_ref`を持つsub_splitterは、gradient edgeとは別namespaceのcopy edgeとして分離し(`fam-json-core.ja.md`の既存翻訳写本契約をgraph edgeへ写像するのみ)、gradient_typeもcopy_roleも持たないnodeは関係を捏造せず`unclassified_node_refs`として明示保持する(§7.1決定論closureの具体例)。
+
+両者(assembly-level FIT / intra-FAM level FIT)は同じPool Occurrence Driver抽象(FIT/MATCH/SELECT)の異なる粒度への具体化であり、統合の要否は未確定のまま残す。
+
 ## 3. 入口/出口adapterモデル
 
 ```text
