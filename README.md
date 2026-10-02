@@ -1,5 +1,12 @@
 # Infoton BaseDriver / IBD
 
+## ZeroRoomLab Portable Civilizationとの接続
+
+IBDは、Portable Civilization ProgramにおいてWorldごとの情報、fact scope、provenance、database境界を混色せず保持する情報基盤側componentとして位置づく。異なるWorldを一つの真偽定規へ潰さず、必要なcross-world relationを明示的に扱う既存責務を、Game / Real / Villageの並行workstreamから利用できる形へ接続する。
+
+この節は上位ナラティブとの接続であり、Season 0の未実装・未検証項目を完成済みへ変更しない。上位Program: [Fork the Lab. Deploy a World. #47](https://github.com/saitoomituru/ZeroRoomLab-manifest/issues/47)
+
+
 状態: `[SEASON-0]` `[DRAFT-SPECIFICATION]`
 更新日: 2026-08-03
 
