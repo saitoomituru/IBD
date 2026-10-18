@@ -41,3 +41,19 @@ Shannon, C. E. (1948), *A Mathematical Theory of Communication* は、離散情�
 - 数論と制度の批判的論考: https://note.com/fusamofu326/n/na962c946dfa0
 
 「量子」という語の現代政策・投資・安全保障上の意味の偏りに関する議論は**著者の制度的評価・研究主張**として区別する。政策上の制限と語彙の歴史的由来については、対象制度・時期・法域の証拠なしに法的禁止や普遍的な語義独占を断定しない。原論文のSelect Fact、現代の語用に関するMatch evidence、制度因果のFit仮説を無断昇格させない。
+
+## Open-variable contract / 追加受入条件
+
+B/Cの一致を得る前に、送信者・受信者・方向付き因果・媒体・明示符号化・量子化の有無を自動補完しない。必要なら仮説やFixture固有の条件として与える。共有World、共通原因、事前訓練、視線・音・身体動作、未知の条件を候補から事前排除しない。**未設定は false ではなく unbound / unknown / not-evaluated**。
+
+研究語彙「霊的量子／魔術量子」を特定の自然科学の成否に直結させず、文化・宗教・技術史上の語源注釈を保持する。Shannonの1948年論文には連続情報源も含まれ、A領域は単なるデジタルパケットだけではない。ただしB/Cの一致解釈をAの特定の実装へ強制する理由にはならない。
+
+### Driver仕様Fixture（将来のテスト用、未実行）
+
+- A: SELECTがセンサーSの時刻T/地点Pのレコードを返す。河川全体温度は結果へ付加しない。
+- B: MATCHが共有文脈を照合する。送信者／受信者が不明なら不明のまま保持し、失敗扱いしない。
+- C: FITが二つの目的/手段の関係グラフを比較する。原典SELECTに同一起源を追加しない。
+- A↔C: SELECT別出典でもFITは別評価。FIT支持でもSELECT同一起源を自動生成しない。
+- Error scope: OAE未評価は非成立と同一視しない。因果方向を付与するときは、その試験条件と証拠を別記する。
+
+レビューの共通入口：[Manifest読解ガード](https://github.com/saitoomituru/ZeroRoomLab-manifest/blob/main/docs/operations/infoton-abc-open-scope-agent-guard.ja.md)。
