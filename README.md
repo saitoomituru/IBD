@@ -27,7 +27,9 @@ IBDは、Portable Civilization ProgramにおいてWorldごとの情報、fact sc
 Q  = 制約・探索範囲・証拠条件
 ```
 
-**A/B/C・モデルDriverの補足：** [SELECT/MATCH/FIT Evidence設計](docs/architecture/evidence-model-drivers-weaver-abc.ja.md)を参照。抽象的一致操作を共有しても、SQL/FIT/ベクトル等の具体Driverは別。B/C研究は送受信因果、明示パケット、物理媒体、存在論を事前固定しない。評価範囲はOAEへ残す。いずれもSeason 0の設計要求であり実装済みの宣言ではない。\n\nIBDは普通のSQLラッパーではありません。RDB、グラフストア、ベクトル索引、ファイル、外部業務システムは、FAM探索技が参照する保存・証拠・投影先です。IBDの中心責務は、データを一つの製品へ押し込むことではなく、探索技の意味、由来、分離境界、再開条件を失わず保存・検索・再合成することです。
+**A/B/C・モデルDriverの補足：** [SELECT/MATCH/FIT Evidence設計](docs/architecture/evidence-model-drivers-weaver-abc.ja.md)を参照。抽象的一致操作を共有しても、SQL/FIT/ベクトル等の具体Driverは別。B/C研究は送受信因果、明示パケット、物理媒体、存在論を事前固定しない。評価範囲はOAEへ残す。いずれもSeason 0の設計要求であり実装済みの宣言ではない。
+
+IBDは普通のSQLラッパーではありません。RDB、グラフストア、ベクトル索引、ファイル、外部業務システムは、FAM探索技が参照する保存・証拠・投影先です。IBDの中心責務は、データを一つの製品へ押し込むことではなく、探索技の意味、由来、分離境界、再開条件を失わず保存・検索・再合成することです。
 
 ---
 
