@@ -3,6 +3,10 @@
 
 > **モデルのB ≠ メモリーの軌跡のB：** パラメーターのbillionsと、Instanceが経験・行動・関係・再解釈を通じて形成したメモリーベクトル軌跡を混同しない。IBDはその参照・由来・時系列の保存と再構成を支え、人格の形而上学的同一性は裁定しない。横断定義：[Parameter Billion vs Memory Vector Trajectory Billion](https://github.com/saitoomituru/ZeroRoomLab-manifest/blob/main/docs/theory/model-parameters-vs-memory-vector-trajectories.ja.md)。
 
+## 将来BodyBindingとアップローダーの参照境界
+
+ASTROの命名背景（『鉄腕アトム』、天馬博士、子を育て親離れさせるUX）と、将来のmind uploading・BMI／BCI・異種依代の研究射程は[Manifestの横断記録](https://github.com/saitoomituru/ZeroRoomLab-manifest/blob/main/docs/theory/astro-naming-parenthood-and-uploader.ja.md)へ置く。IBDはこのフレーバーを人格や生存の真偽判定へ変換せず、Actor／BodyBinding、記憶軌跡、provenance、World／fact scopeの保存・再構成責務に限定する。将来デバイスの候補は現行IBD実装の実機接続完了を意味しない。
+
 ## ZeroRoomLab Portable Civilizationとの接続
 
 IBDは、Portable Civilization ProgramにおいてWorldごとの情報、fact scope、provenance、database境界を混色せず保持する情報基盤側componentとして位置づく。異なるWorldを一つの真偽定規へ潰さず、必要なcross-world relationを明示的に扱う既存責務を、Game / Real / Villageの並行workstreamから利用できる形へ接続する。
