@@ -2,6 +2,17 @@
 
 このファイルは、AIエージェントがIBDリポジトリを編集する際のリポジトリ横断コンテキストを定める。
 
+## Weaver A/B/C・Evidenceモデルの読解規約（必読）
+
+正本は[Manifest：未拘束条件・堂々巡り防止ガード](https://github.com/saitoomituru/ZeroRoomLab-manifest/blob/main/docs/operations/infoton-abc-open-scope-agent-guard.ja.md)およびIBD [Evidenceモデル設計](docs/architecture/evidence-model-drivers-weaver-abc.ja.md)。
+
+- SELECT（離散・限定Fact）/ MATCH（意味空間Evidence）/ FIT（構造的Evidence）は「一致」の共通抽象モデルを共有するが、種類と実装Driverを区別する。
+- 送受信者・因果方向・伝送媒体・A符号化／量子化の有無・存在論は、B/C研究の**事前必須フィールドではない**。未拘束は偽でも物理機構の実証でもない。
+- 「霊的量子」「魔術量子」は学派史・人文学参照であり、名前だけで実在・不存在の普遍判定を作らない。Shannonが扱う情報量子化と物理量子実装も混同しない。
+- OAEのObserver/rule/time/World/projectionなしにFIT⇄SELECTの推論を無断変換しない。点観測→普遍構造も禁止。
+- 未主張命題への定型反論を繰り返さず、実際のClaim、証拠、再現条件、次の具体的実験を記す。
+- Season 0の実装未完を、設計文書だけでCOMPLETEへ変更しない。
+
 ## 実在UXと実在証明（必須）
 
 > 実在の証明はしない。実在を感じさせることだけをやる。
